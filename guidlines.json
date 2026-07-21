@@ -1,0 +1,156 @@
+
+{
+  "theme_and_identity": {
+    "name": "CareAI",
+    "vibe": "Warm, friendly, accessible, and highly reassuring.",
+    "archetype": "ARCHETYPE 3: PASTEL & SOFT with a functional twist.",
+    "description": "A health dashboard that feels less like a sterile clinic and more like a helpful friend. It uses heavy glassmorphism, hyper-rounded corners, pastel colors, and floating 'sticker' illustrations to reduce health-related anxiety while keeping critical functions like the SOS button highly visible."
+  },
+  "typography": {
+    "strategy": "The 'Soft Utility' - Friendly rounded headings paired with a highly readable, approachable body font.",
+    "fonts": {
+      "headings": {
+        "family": "Fredoka",
+        "weights": ["500", "600"],
+        "usage": "Use for all H1, H2, H3, and major widget numbers. Gives the 'sticker' and playful vibe."
+      },
+      "body": {
+        "family": "Nunito",
+        "weights": ["400", "600", "700"],
+        "usage": "Use for all paragraphs, labels, lists, and UI text."
+      }
+    },
+    "hierarchy": {
+      "h1": "text-4xl sm:text-5xl font-semibold tracking-tight text-slate-800",
+      "h2": "text-2xl sm:text-3xl font-medium tracking-tight text-slate-800",
+      "h3": "text-xl sm:text-2xl font-medium text-slate-700",
+      "body": "text-base text-slate-600 leading-relaxed",
+      "labels": "text-xs font-bold uppercase tracking-[0.1em] text-slate-500"
+    },
+    "instruction": "Import Fredoka and Nunito from Google Fonts in index.html. DO NOT use Inter or Roboto."
+  },
+  "colors": {
+    "background": {
+      "base": "#FDFBF7",
+      "description": "Warm off-white/cream, never pure white to reduce eye strain."
+    },
+    "primary": {
+      "DEFAULT": "#FDA4AF",
+      "foreground": "#FFFFFF",
+      "description": "Pastel Rose. Used for primary friendly actions, AI chatbot accents, and highlighted states."
+    },
+    "secondary": {
+      "DEFAULT": "#93C5FD",
+      "foreground": "#1E3A8A",
+      "description": "Soft Pastel Blue. Used for secondary cards, quick actions, and relaxing UI elements."
+    },
+    "accent": {
+      "DEFAULT": "#D8B4E2",
+      "foreground": "#4A044E",
+      "description": "Soft Lavender. Used for the AI Chatbot identity and avatar."
+    },
+    "destructive": {
+      "DEFAULT": "#EF4444",
+      "foreground": "#FFFFFF",
+      "description": "Signal Red. EXCLUSIVELY for the SOS Emergency button and destructive actions. Must stand out."
+    },
+    "text": {
+      "heading": "#1E293B",
+      "body": "#475569",
+      "muted": "#94A3B8"
+    },
+    "surfaces": {
+      "glass": "bg-white/70 backdrop-blur-xl border border-white/50 shadow-[0_8px_32px_rgba(0,0,0,0.04)]",
+      "solid": "bg-white border border-slate-100 shadow-sm"
+    }
+  },
+  "visual_enhancers": {
+    "glassmorphism": "Mandatory for the main dashboard cards and AI chatbot window. Use `bg-white/70 backdrop-blur-2xl border border-white/60`. Ensures the pastel background bleeds through softly.",
+    "borders_and_radius": "Hyper-rounded. Use `rounded-3xl` for main cards, `rounded-2xl` for internal elements, `rounded-full` for buttons. No sharp edges anywhere.",
+    "shadows": "Ambient, tinted shadows. e.g., `shadow-[0_8px_30px_rgba(253,164,175,0.15)]` on primary buttons.",
+    "stickers_concept": "Place small floating 3D images (absolute positioned, rotated slightly) on the edges of cards to act as 'stickers'. e.g., a pill sticker on the medicine card."
+  },
+  "components": {
+    "sos_button": {
+      "style": "fixed bottom-6 right-6 w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-red-500 shadow-[0_0_40px_rgba(239,68,68,0.6)] flex items-center justify-center z-50 text-white font-black text-xl border-4 border-white/50",
+      "animation": "Pulse animation `animate-pulse` or a custom heartbeat scale. Must be hyper-visible."
+    },
+    "cards": {
+      "style": "Use the glassmorphism surface. Internal padding must be generous: `p-6` or `p-8`."
+    },
+    "ai_chatbot": {
+      "layout": "Floating window or dedicated view with Lavender accents.",
+      "bubbles": "User: solid pastel blue (`bg-blue-100 rounded-3xl rounded-tr-sm`). AI: glassmorphism white (`bg-white/80 rounded-3xl rounded-tl-sm`).",
+      "typing_indicator": "Three bouncing pastel dots.",
+      "disclaimer": "Must be prominently displayed at the top of the chat in a muted yellow/orange pastel banner."
+    },
+    "symptom_checker": {
+      "chips": "Multi-select rounded-full pills. Unselected: `bg-white border-slate-200`. Selected: `bg-rose-200 border-rose-300 text-rose-900`."
+    },
+    "leaflet_map": {
+      "container": "Must be clipped inside a `rounded-3xl` container with `overflow-hidden` and a thick `border-4 border-white`."
+    }
+  },
+  "grids_and_layouts": {
+    "dashboard_grid": "Bento-style. `grid-cols-1 md:grid-cols-12 gap-6`. Welcome banner spanning full width. Health summary `col-span-8`, Quick actions `col-span-4`.",
+    "spacing": "Extremely generous. Sections should be separated by `gap-8` or `my-12`. Never cramp information, especially for health data."
+  },
+  "motion": {
+    "transitions": "All buttons need `transition-transform hover:scale-105 active:scale-95 duration-200`.",
+    "entrances": "Staggered fade-up for dashboard cards using Framer Motion (`initial={{ opacity: 0, y: 20 }}`).",
+    "decorative": "Floating 'stickers' should have a very slow, infinite `translate-y` up/down floating animation."
+  },
+  "media": {
+    "images": [
+      {
+        "url": "https://images.unsplash.com/photo-1689154345830-861f74006b09?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAzMzl8MHwxfHNlYXJjaHwzfHwzZCUyMG1lZGljYWwlMjBpY29uJTIwcGFzdGVsfGVufDB8fHx8MTc4NDY0NjA0Mnww&ixlib=rb-4.1.0&q=85",
+        "description": "Pastel abstract 3D shapes. Extract or use as a background texture/sticker in the Hero/Welcome widget.",
+        "category": "background/sticker"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1707216171962-9f1514c0bda6?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1Mjh8MHwxfHNlYXJjaHwyfHwzZCUyMGhlYXJ0JTIwcGlua3xlbnwwfHx8fDE3ODQ2NDYwNDJ8MA&ixlib=rb-4.1.0&q=85",
+        "description": "3D pink heart object. Use as a 'sticker' illustration in the Disease Risk Predictors (Heart) or Health Summary card.",
+        "category": "sticker_heart"
+      },
+      {
+        "url": "https://images.pexels.com/photos/31406896/pexels-photo-31406896.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+        "description": "Pink and white pills. Use as a cropped image or thumbnail for the Medicine Reminder section.",
+        "category": "sticker_pill"
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1678940805950-73f2127f9d4e?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjY2NjV8MHwxfHNlYXJjaHwyfHxmcmllbmRseSUyMGRvY3RvciUyMHBvcnRyYWl0JTIwcGFzdGVsfGVufDB8fHx8MTc4NDY0NjA0Mnww&ixlib=rb-4.1.0&q=85",
+        "description": "Friendly doctor portrait. Use in the AI Chatbot avatar area (if making a persona) or Doctor Contacts section.",
+        "category": "avatar_doctor"
+      }
+    ],
+    "icons": "Use `lucide-react`. Make them thick (strokeWidth={2.5}) and colorful (don't leave them gray). Wrap them in circular pastel backgrounds."
+  },
+  "accessibility": {
+    "contrast": "Ensure pastel backgrounds have sufficient contrast with text. Use dark slate/navy text, NEVER white text on pastel backgrounds.",
+    "focus": "Focus rings should be `focus:ring-4 focus:ring-rose-200 focus:outline-none`.",
+    "testing": "All interactive elements MUST have `data-testid` attributes (e.g., `data-testid='sos-button'`)."
+  },
+  "instructions_to_main_agent": [
+    "DO NOT use generic clean-tech looks. Stick rigidly to the Pastel + Stickers + Glassmorphism concept requested by the user.",
+    "Ensure `lucide-react` icons are styled to look friendly (thick strokes, pastel wrappers).",
+    "Use Framer Motion to make the 'stickers' (images) literally float slowly up and down.",
+    "The SOS button is an absolute critical feature. Make it a fixed button on the bottom right, big, red, glowing, and ensure it uses `a` tags with `tel:` or `sms:` protocols.",
+    "Implement glassmorphism globally for cards over a slightly warm, off-white background.",
+    "For the Map, use OpenStreetMap with `react-leaflet`. Clip it nicely inside rounded corners.",
+    "For AI Chatbot, do not make it look like a terminal or standard ChatGPT. It should feel like a cozy, friendly iMessage thread with a cute Avatar."
+  ],
+  "universal_guidelines": [
+    "You tend to converge toward generic, 'on distribution' outputs. Avoid this: make creative, distinctive frontends that surprise and delight.",
+    "Don't make generic centered layouts. Use asymmetrical bento grids.",
+    "Create depth through layered design elements with z-index hierarchy.",
+    "Use glass-morphism effects with backdrop filters (12-24px blur).",
+    "You MUST NOT apply universal transition (`transition: all`). Add transitions for specific interactive elements only.",
+    "You MUST NOT center align the app container. Do not add `.App { text-align: center; }`.",
+    "Always use modern button styles (pill-shaped, high border-radius).",
+    "NEVER use AI assistant Emoji characters like 🤖🧠💭💡🔮🎯 etc for icons. Use proper Lucide icons.",
+    "Every interaction needs micro-animations - hover states, transitions. Static = dead.",
+    "Use 2-3x more spacing than feels comfortable. Cramped designs look cheap.",
+    "Prioritize using pre-existing components from src/components/ui when applicable.",
+    "Use `sonner` for toast notifications."
+  ]
+}

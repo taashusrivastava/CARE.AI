@@ -1,0 +1,531 @@
+# @emergentbase/visual-edits
+
+Visual editing system for React apps. Adds metadata attributes to JSX elements at compile time, serves a dev server for source file editing, and injects a browser overlay for element selection and inline editing — all coordinated via postMessage between a parent app and the iframe it hosts.
+
+## Package Exports
+
+| Import path | Description | Format |
+|---|---|---|
+| `@emergentbase/visual-edits` | Shared constants (ATTRS, SOURCE_TYPE, EDIT_TYPE, etc.) | CJS + ESM |
+| `@emergentbase/visual-edits/types` | TypeScript type definitions | CJS + ESM |
+| `@emergentbase/visual-edits/babel-plugin` | Babel metadata injection plugin | CJS |
+| `@emergentbase/visual-edits/server` | Dev server middleware (setupDevServer, createMiddleware) | CJS |
+| `@emergentbase/visual-edits/craco` | CRA + Craco integration (withVisualEdits) | CJS |
+| `@emergentbase/visual-edits/vite` | Vite plugin (visualEdits) | ESM |
+| `@emergentbase/visual-edits/visual-edit-overlay` | Browser overlay script (IIFE, 31KB minified) | IIFE |
+
+## Quick Start (CRA + Craco)
+
+```js
+// craco.config.js
+const { withVisualEdits } = require("@emergentbase/visual-edits/craco");
+
+module.exports = withVisualEdits({
+  // ...your existing craco config
+});
+```
+
+This single call automatically:
+1. Adds the babel metadata plugin (dev only)
+2. Registers `/ping` and `/edit-file` dev server endpoints
+3. Emits `visual-edit-overlay.js` as a webpack asset
+4. Injects an iframe-guard `<script>` into the HTML `<head>`
+
+### Options
+
+```js
+withVisualEdits(cracoConfig, {
+  enableVisualEdits: true,      // Default: process.env.NODE_ENV !== "production"
+  tailwindCdn: "https://cdn.tailwindcss.com",  // Set to false to disable
+});
+```
+
+## Quick Start (Vite)
+
+```ts
+// vite.config.ts
+import { visualEdits } from "@emergentbase/visual-edits/vite";
+import react from "@vitejs/plugin-react";
+
+export default defineConfig({
+  plugins: [visualEdits(), react()],
+});
+```
+
+This single plugin automatically:
+1. Runs the babel metadata plugin on JSX/TSX files (dev only, before Vite's esbuild transform)
+2. Injects the iframe-guard `<script>` into the HTML `<head>`
+3. Serves `visual-edit-overlay.js` from memory
+4. Registers `/ping` and `/edit-file` dev server middleware
+
+### Options
+
+```ts
+visualEdits({
+  enable: true,              // Default: true in serve mode, false in build
+  tailwindCdn: "https://cdn.tailwindcss.com",  // Set to false to disable
+});
+```
+
+## Architecture
+
+```
+┌─────────────────────────────────────────────────────┐
+│  Parent App (app-builder)                           │
+│                                                     │
+│  postMessage ─────────────► ACTIVATE                │
+│  postMessage ─────────────► APPLY_CHANGES           │
+│  postMessage ─────────────► SET_INTERACTION_MODE     │
+│                                                     │
+│  ◄──────────── ELEMENT_SELECTED ◄── postMessage     │
+│  ◄──────────── INLINE_EDIT_END  ◄── postMessage     │
+│                                                     │
+│  POST /edit-file ──────────► Dev Server             │
+│                              (modifies source)      │
+│                                                     │
+│  ┌─────────────────────────────────────────────┐    │
+│  │  iframe (consumer app)                      │    │
+│  │                                             │    │
+│  │  Babel Plugin          Visual Edit Overlay  │    │
+│  │  (compile time)        (runtime)            │    │
+│  │  Stamps metadata ──►   Reads metadata       │    │
+│  │  on every JSX          to classify,         │    │
+│  │  element               highlight, select    │    │
+│  └─────────────────────────────────────────────┘    │
+└─────────────────────────────────────────────────────┘
+```
+
+## Modules
+
+### Babel Plugin (`@emergentbase/visual-edits/babel-plugin`)
+
+Runs at compile time. Adds metadata attributes to every JSX element so the overlay can map DOM nodes back to source code.
+
+**Attributes injected:**
+
+| Attribute | Example | Description |
+|---|---|---|
+| `x-file-name` | `"src/App.tsx"` | Source file path |
+| `x-line-number` | `"42"` | Line number |
+| `x-column` | `"8"` | Column number |
+| `x-component` | `"div"` | Element or component name |
+| `x-id` | `"App.tsx_42"` | Unique element identifier |
+| `x-dynamic` | `"true"` | Contains `{expression}` children |
+| `x-excluded` | `"true"` | Portal/overlay component (non-interactive) |
+| `x-source-type` | `"static-local"` | Variable source classification |
+| `x-source-var` | `"title"` | Source variable name |
+| `x-source-file` | `"./data.ts"` | File where source is defined |
+| `x-source-file-abs` | `"/abs/path/data.ts"` | Absolute path |
+| `x-source-line` | `"10"` | Line where source is defined |
+| `x-source-path` | `"title"` | Object access path |
+| `x-source-editable` | `"true"` | Whether the source can be edited |
+| `x-array-var` | `"items"` | Array variable in `.map()` context |
+| `x-array-file` | `"./data.ts"` | File containing the array |
+| `x-array-line` | `"5"` | Line of the array declaration |
+| `x-array-item-param` | `"item"` | Callback parameter name |
+| `x-array-inline` | `"true"` | Inline array literal (no named variable) |
+
+**Source type classifications:**
+
+| Type | Editable | Description |
+|---|---|---|
+| `static-local` | Yes (if `x-source-editable`) | Variable defined in same file |
+| `static-imported` | Yes (if `x-source-editable`) | Variable imported from another file |
+| `prop` | No | Passed as a prop from parent |
+| `state` | No | From `useState` or similar |
+| `computed` | No | Derived/computed value |
+| `external` | No | From external library |
+| `unknown` | No | Could not be determined |
+
+**Analysis capabilities:**
+- Expression detection — identifies `{variable}` expressions in JSX
+- Array context detection — recognizes `.map()`, `.filter()`, `.flatMap()`, etc., including inline array literals (`[{...}].map(...)`)
+- Cross-file resolution — traces imported variables back to their definitions
+- Prop source tracking — follows props through parent component trees
+- Portal detection — excludes Radix UI portals and overlay components
+
+**Direct usage (without craco plugin):**
+
+```js
+// babel.config.js
+const babelPlugin = require("@emergentbase/visual-edits/babel-plugin").default;
+
+module.exports = {
+  plugins: [babelPlugin],
+};
+```
+
+### Dev Server (`@emergentbase/visual-edits/server`)
+
+Connect-compatible middleware for handling visual edit requests. Works with both webpack-dev-server and Vite (any server that supports Node's `IncomingMessage`/`ServerResponse`). No Express dependency — uses raw Node HTTP APIs.
+
+**Exports:**
+- `setupDevServer(config)` — Wraps a webpack-dev-server config to register middleware (used by the craco plugin)
+- `createMiddleware()` — Returns a Connect-compatible middleware function (used by the Vite plugin, or any custom server)
+
+**Endpoints:**
+
+| Method | Path | Auth | Description |
+|---|---|---|---|
+| GET | `/ping` | No | Health check — returns `{ status: "ok", time }` |
+| POST | `/edit-file` | Yes | Apply source code edits |
+| OPTIONS | `/edit-file` | No | CORS preflight |
+
+**Authentication:** Checks `x-api-key` header against the `SUP_PASS` environment variable (or `VISUAL_EDIT_API_KEY`). Auth is skipped when no password is configured (local development).
+
+**POST /edit-file request format:**
+
+```json
+{
+  "changes": [
+    {
+      "type": "textContent",
+      "fileName": "src/components/Hero.tsx",
+      "lineNumber": 12,
+      "component": "h1",
+      "textContent": "New heading text"
+    }
+  ]
+}
+```
+
+**Edit types supported:**
+- `textContent` — Update JSX text content directly
+- `variableEdit` — Update a variable's value in source code (named variables and inline array literals)
+
+After each edit, the server commits changes to git automatically.
+
+**Direct usage:**
+
+```js
+// With webpack-dev-server:
+const setupDevServer = require("@emergentbase/visual-edits/server").default;
+module.exports = { devServer: setupDevServer({}) };
+
+// With any Connect/Node HTTP server:
+const { createMiddleware } = require("@emergentbase/visual-edits/server");
+app.use(createMiddleware());
+```
+
+### Visual Edit Overlay (`@emergentbase/visual-edits/visual-edit-overlay`)
+
+Browser-side IIFE script (~31KB minified). Injected into the iframe via a `<script>` tag. Provides element selection, hover highlighting, inline editing, and parent communication.
+
+**Activation flow:**
+1. Script only initializes when the page is inside an iframe (`window.self !== window.top`)
+2. Injects CSS styles for hover/selection outlines and badges
+3. Listens for postMessage commands from the parent
+4. Parent sends `ACTIVATE` command to enable select mode
+
+**Interaction modes:**
+
+| Mode | Cursor | Hover | Click | Interactive elements |
+|---|---|---|---|---|
+| `select` | Crosshair | Blue outlines + badges | Selects element | Blocked (buttons, links, etc.) |
+| `preview` | Default | None | Normal | Allowed |
+
+**Element classification on selection:**
+- Determines if element is **dynamic** (contains expressions) or **static**
+- Determines if element is **editable** (source can be traced and modified)
+- Extracts computed styles (color, font, spacing, etc.)
+- Detects multi-instance elements (from `.map()` arrays)
+
+**Badge system:**
+- Hover badge — shows element tag name, positioned above/below with collision detection
+- Selected badges — persistent, with distinct styling for dynamic vs static elements
+- Badges reposition on scroll/resize with debounced RAF
+
+**Inline editing:**
+- Parent sends `ENABLE_INLINE_EDIT` → element becomes `contentEditable`
+- Overlay sends `INLINE_EDIT_CHANGE` on each keystroke
+- Enter saves, Escape cancels → `INLINE_EDIT_END` sent to parent
+
+**Global API (for debugging):**
+
+```js
+window.visualEditOverlay.activate();
+window.visualEditOverlay.deactivate();
+window.visualEditOverlay.clearSelection();
+window.visualEditOverlay.getState();
+```
+
+### Shared Constants (`@emergentbase/visual-edits`)
+
+```js
+const {
+  ATTRS,                  // Metadata attribute name constants
+  REQUIRED_ATTRS,         // [FILE_NAME, LINE_NUMBER, COMPONENT]
+  SOURCE_TYPE,            // { STATIC_LOCAL, PROP, STATE, ... }
+  EDITABLE_SOURCE_TYPES,  // Set<"static-local", "static-imported">
+  READONLY_SOURCE_TYPES,  // Set<"prop", "state", "computed", "external">
+  isEditableSourceType,   // (type, sourceEditable) => boolean
+  EDIT_TYPE,              // { TEXT_CONTENT, VARIABLE_EDIT, READONLY, ... }
+  MONITOR_ACTION,         // Overlay → parent message actions
+  COMMAND_ACTION,         // Parent → overlay command actions
+  MESSAGE_TYPE,           // { SITE_DEBUG, DEBUG_COMMAND }
+  WRAPPER_SPAN_ATTRS,     // Attributes for expression wrapper spans
+  WRAPPER_SPAN_STYLE,     // "display:contents"
+  EXCLUDED_COMPONENTS,    // Set of component names to skip
+  RADIX_ROOTS,            // Set of Radix UI root components
+  isPortalishName,        // (name) => boolean
+} = require("@emergentbase/visual-edits");
+```
+
+### Webpack Plugin (`VisualEditsWebpackPlugin`)
+
+Used internally by the craco plugin. Can also be used directly in custom webpack configs.
+
+```js
+const { VisualEditsWebpackPlugin } = require("@emergentbase/visual-edits/craco");
+
+// In webpack config:
+plugins: [
+  new VisualEditsWebpackPlugin({
+    tailwindCdn: "https://cdn.tailwindcss.com",  // or false to disable
+  }),
+]
+```
+
+**What it does:**
+1. Emits `visual-edit-overlay.js` as a webpack asset (served at `/visual-edit-overlay.js`)
+2. Injects an iframe-guard script before `</head>` via html-webpack-plugin:
+   ```html
+   <script>
+   if(window.self!==window.top){
+     var s=document.createElement("script");
+     s.src="/visual-edit-overlay.js";
+     document.head.appendChild(s);
+     // Tailwind CDN injection (if enabled)
+   }
+   </script>
+   ```
+
+## Message Protocol
+
+### Overlay → Parent (MONITOR_ACTION)
+
+| Action | Data | When |
+|---|---|---|
+| `MODE_ACTIVATED` | `{ url }` | Overlay enters select mode |
+| `MODE_DEACTIVATED` | — | Overlay deactivated |
+| `ELEMENT_SELECTED` | `{ element, isDynamic, isEditable, editType, sourceInfo, arrayIndex, position }` | User clicks an element |
+| `ELEMENT_DESELECTED` | — | Selection cleared |
+| `INTERACTION_MODE_CHANGED` | `{ mode }` | Mode switched |
+| `INLINE_EDIT_START` | `{ elementId, textContent }` | Inline edit begins |
+| `INLINE_EDIT_CHANGE` | `{ elementId, textContent }` | Text changed during inline edit |
+| `INLINE_EDIT_END` | `{ elementId, textContent, originalText, saved, editType, sourceInfo }` | Inline edit finished |
+| `INLINE_EDIT_ERROR` | `{ error, elementId }` | Inline edit failed |
+| `CHANGES_ERROR` | `{ error, elementId }` | DOM change application failed |
+
+### Parent → Overlay (COMMAND_ACTION)
+
+| Action | Data | Effect |
+|---|---|---|
+| `ACTIVATE` | — | Enter select mode |
+| `DEACTIVATE` | — | Exit select mode |
+| `CLEAR_SELECTION` | `{ mouseX?, mouseY? }` | Clear current selection |
+| `APPLY_CHANGES` | `{ elementId, textContent?, className?, ... }` | Apply DOM changes |
+| `SET_INTERACTION_MODE` | `{ mode: "select" \| "preview" }` | Switch mode |
+| `ENABLE_INLINE_EDIT` | `{ elementId?, arrayIndex? }` | Start inline editing |
+| `DISABLE_INLINE_EDIT` | `{ save: boolean }` | Stop inline editing |
+
+**Message envelope:**
+
+```js
+// Overlay → Parent
+{ type: "SITE_DEBUG", action: "ELEMENT_SELECTED", source: "http://...", timestamp: 1234, ...data }
+
+// Parent → Overlay
+{ type: "DEBUG_COMMAND", action: "ACTIVATE", data: { ... } }
+```
+
+## Source Structure
+
+```
+src/
+├── shared/              # Constants & protocol definitions
+│   ├── attributes.ts
+│   ├── source-types.ts
+│   ├── edit-types.ts
+│   ├── message-protocol.ts
+│   ├── excluded-components.ts
+│   ├── wrapper-span.ts
+│   └── index.ts
+├── types/               # TypeScript interfaces
+│   ├── element.ts       # ElementInfo, ComputedStyles, ColorInfo
+│   ├── changes.ts       # PendingChange, HistoryEntry
+│   ├── state.ts         # MonitorState, InlineEditMetadata
+│   ├── protocol.ts      # Message & command interfaces
+│   ├── babel.ts         # SourceInfo, EditRequest, EditResult
+│   └── index.ts
+├── overlay/             # Browser runtime (11 modules)
+│   ├── index.ts         # CONFIG, state, lifecycle, init
+│   ├── badge-manager.ts
+│   ├── styles.ts
+│   ├── classify-element.ts
+│   ├── color-parser.ts
+│   ├── element-info.ts
+│   ├── change-applier.ts
+│   ├── selection-manager.ts
+│   ├── hover-handler.ts
+│   ├── message-handler.ts
+│   └── inline-editor.ts
+├── babel-plugin/        # Compile-time metadata stamping
+│   ├── index.ts
+│   ├── helpers/         # caches.ts, jsx-utils.ts
+│   ├── analysis/        # expression-analyzer, array-context,
+│   │                    # cross-file-resolver, dynamic-detector,
+│   │                    # prop-source-tracker, portal-detector
+│   └── visitors/        # jsx-element-visitor, jsx-opening-element-visitor
+├── server/              # Dev server middleware (10 modules)
+│   ├── index.ts         # setupDevServer entry + createMiddleware re-export
+│   ├── middleware.ts     # Shared Connect-compatible middleware
+│   ├── types.ts         # Raw Node HTTP helpers (Req, Res, sendJson, etc.)
+│   ├── auth.ts, cors.ts, git.ts, file-utils.ts
+│   ├── ast-helpers.ts, variable-edit.ts, jsx-edit.ts
+│   └── edit-route.ts
+├── craco-plugin.ts      # withVisualEdits() wrapper
+├── webpack-plugin.ts    # VisualEditsWebpackPlugin
+└── vite-plugin.ts       # Vite plugin (ESM)
+```
+
+## Build & Development
+
+```bash
+npm run build          # Build all modules
+npm run build:shared   # Shared constants + types (CJS + ESM + .d.ts)
+npm run build:overlay  # Overlay IIFE (esbuild, minified)
+npm run build:babel    # Babel plugin (CJS + .d.ts)
+npm run build:server   # Server middleware (CJS + .d.ts)
+npm run build:plugins  # Craco + webpack (CJS) + Vite (ESM) plugins
+
+npm run typecheck      # TypeScript type checking (tsc --noEmit)
+npm test               # Run all tests (798 tests, 27 suites)
+```
+
+The overlay is built with **esbuild** directly (not tsup) because it needs `--format=iife --global-name=visualEditOverlay --bundle` to produce a self-contained browser script. tsup wraps esbuild but doesn't expose IIFE global-name support. Everything else uses **tsup** for its `--dts` type declaration generation, which the overlay doesn't need (no type consumers for a browser IIFE).
+
+The babel-plugin, server, and craco/webpack plugins ship **CJS only** because their consumers are always CJS contexts (babel configs, craco configs, Node middleware). The shared constants and types ship **CJS + ESM** since they're the public API and may be consumed by either module system. The Vite plugin ships **ESM only** because Vite configs are always ESM (`vite.config.ts`). It loads CJS server modules at runtime via `createRequire(import.meta.url)` to avoid bundling CJS `require()` calls into ESM output.
+
+**Test projects:**
+
+| Project | Environment | Tests |
+|---|---|---|
+| `shared` | Node | 42 |
+| `visual-edit-overlay` | JSDOM | 329 |
+| `babel-plugin` | Node | 390 |
+| `server` | Node | 37 |
+
+```bash
+npx jest --selectProjects shared
+npx jest --selectProjects visual-edit-overlay
+npx jest --selectProjects babel-plugin
+npx jest --selectProjects server
+```
+
+## Peer Dependencies
+
+All optional — install only what you use:
+
+| Package | Required for |
+|---|---|
+| `@babel/core` ^7.0.0 | Babel plugin, Vite plugin |
+| `@babel/parser` ^7.0.0 | Babel plugin, server |
+| `@babel/traverse` ^7.0.0 | Babel plugin, server |
+| `@babel/generator` ^7.0.0 | Server |
+| `vite` ^5.0.0 \|\| ^6.0.0 | Vite plugin |
+
+## Setup
+
+The package is published to both GitHub Packages and a Cloudflare R2 CDN.
+
+### Install via CDN (recommended for consumers)
+
+No authentication needed:
+
+```bash
+npm install https://your-r2-bucket-url/npm/emergentbase-visual-edits-latest.tgz
+# or a specific version:
+npm install https://your-r2-bucket-url/npm/emergentbase-visual-edits-1.1.0.tgz
+```
+
+### Install via GitHub Packages
+
+Requires a `.npmrc` pointing to GitHub Packages:
+
+```
+@emergentbase:registry=https://npm.pkg.github.com
+//npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}
+```
+
+Each developer needs a **classic** GitHub PAT with `read:packages` scope (fine-grained tokens don't support GitHub Packages).
+
+```bash
+npm install @emergentbase/visual-edits
+```
+
+### CI
+
+- **Publishing**: The `publish.yml` workflow uses the auto-provided `secrets.GITHUB_TOKEN` — no extra secrets needed for GitHub Packages. R2 upload requires `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_API_TOKEN`, and `R2_BUCKET` secrets.
+- **Docker builds**: If installing via CDN URL, no token needed. If using GitHub Packages, pass `GITHUB_TOKEN` as a build-arg.
+
+## Publishing a New Version
+
+1. Commit and push your changes to `main`
+2. Go to Actions > **"Publish @emergentbase/visual-edits"** > **Run workflow**
+3. Select the version bump type: **patch**, **minor**, or **major**
+4. Click **Run workflow**
+
+The workflow automatically:
+- Bumps the version in `package.json`
+- Commits and tags the version bump (`v1.2.0`)
+- Publishes to GitHub Packages
+- Uploads the tarball to Cloudflare R2 CDN (versioned + `latest`)
+- Creates a GitHub release with auto-generated changelog
+
+**Alternative:** Create a GitHub release manually — the workflow triggers automatically but skips the version bump and release creation steps (assumes you've already bumped the version and the release exists).
+
+After publishing, update consumers (e.g. `app-builder/templates/shadcn/frontend/package.json`) to the new version / CDN URL.
+
+## Testing Package Changes Locally
+
+To test changes without publishing, use `npm link` to symlink the package into a consumer project:
+
+```bash
+# 1. Build the package
+cd visual-edits
+npm run build
+
+# 2. Register the global link
+npm link
+
+# 3. Link it into the consumer project
+cd ../ml-academy/frontend   # or any consumer
+npm link @emergentbase/visual-edits
+
+# 4. Clear webpack cache and restart (webpack caches compiled output)
+rm -rf node_modules/.cache
+npm start
+```
+
+After making further changes to `visual-edits`, re-run `npm run build` — the symlink means the consumer picks up the new build immediately (just clear the webpack cache).
+
+To unlink when done:
+
+```bash
+cd ../ml-academy/frontend
+npm unlink @emergentbase/visual-edits
+npm install   # restore the published version
+```
+
+## Migrating from inline plugins
+
+If your project previously used the inline `plugins/visual-edits/` directory:
+
+1. Install the package: `npm install @emergentbase/visual-edits`
+2. Update `craco.config.js` to use `withVisualEdits()` (see Quick Start)
+3. Delete `plugins/visual-edits/` (babel-metadata-plugin, server, shared, dev-server-setup.js)
+4. Delete `public/visual-edit-overlay.js`
+5. Remove the visual-edits `<script>` block from `public/index.html`
+
+The craco plugin handles everything the old manual setup did.
