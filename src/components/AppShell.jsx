@@ -47,6 +47,7 @@ export default function AppShell() {
               <div>
                 <div className="font-display text-2xl leading-none">CareAI</div>
                 <div className="text-xs text-slate-500 mt-1">Health, gently.</div>
+              </div>
             </div>
 
             <nav className="mt-6 flex-1 space-y-1">
@@ -79,6 +80,7 @@ export default function AppShell() {
                 <LogOut className="w-4 h-4" /> Sign out
               </button>
             </div>
+          </div>
         </aside>
 
         <main className="flex-1 min-w-0 p-4 lg:p-8">

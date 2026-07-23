@@ -41,6 +41,7 @@ export default function Nearby() {
           <h1 className="font-display text-3xl">Nearby Hospitals</h1>
           <p className="text-sm text-slate-500">Find care around you.</p>
         </div>
+      </div>
 
       <div className="mt-6 glass rounded-3xl p-6">
         {error && (
@@ -76,10 +77,12 @@ export default function Nearby() {
                 <MapPin className="w-4 h-4" /> Search hospitals on Google Maps
               </a>
             </div>
+          </div>
         ) : !error ? (
           <div className="text-center text-slate-500 py-10">
             <div className="animate-pulse text-2xl mb-2">+</div>
             <div>Getting your location...</div>
+          </div>
         ) : null}
       </div>
 
@@ -87,5 +90,6 @@ export default function Nearby() {
         <strong>Disclaimer:</strong> This map shows your current location. Hospital search is done via Google Maps in a new tab.
         For emergencies, please call local emergency services immediately.
       </div>
+    </div>
   );
 }

@@ -1,32 +1,109 @@
-"""CareAI Backend - FastAPI server with JWT auth, MongoDB, and Claude Sonnet 4.5 chatbot."""
+"""CareAI Backend - FastAPI server with JWT auth, JSON file DB, and OpenAI chatbot."""
 from fastapi import FastAPI, APIRouter, HTTPException, Depends, status
 from fastapi.responses import StreamingResponse
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
-from motor.motor_asyncio import AsyncIOMotorClient
+from openai import AsyncOpenAI
 import os
+import json
 import logging
 import uuid
 import jwt
 import bcrypt
+import asyncio
 from pathlib import Path
-from pydantic import BaseModel, Field, EmailStr, ConfigDict
-from typing import List, Optional, Literal
+from pydantic import BaseModel, Field, ConfigDict
+from typing import List, Optional
 from datetime import datetime, timezone, timedelta
 
-from emergentintegrations.llm.chat import LlmChat, UserMessage, TextDelta, StreamDone
+load_dotenv()
 
 ROOT_DIR = Path(__file__).parent
-load_dotenv(ROOT_DIR / '.env')
+DB_FILE = ROOT_DIR / 'db.json'
 
-mongo_url = os.environ['MONGO_URL']
-client = AsyncIOMotorClient(mongo_url)
-db = client[os.environ['DB_NAME']]
-
-JWT_SECRET = os.environ['JWT_SECRET']
+JWT_SECRET = os.environ.get('JWT_SECRET', 'careai-dev-secret-key-change-in-production')
 JWT_ALGO = os.environ.get('JWT_ALGORITHM', 'HS256')
-EMERGENT_LLM_KEY = os.environ['EMERGENT_LLM_KEY']
+OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY', 'YOUR_OPENAI_API_KEY')
+
+# ---------- JSON File Database ----------
+def _load_db():
+    if DB_FILE.exists():
+        try:
+            return json.loads(DB_FILE.read_text('utf-8'))
+        except:
+            pass
+    return {"users": [], "contacts": [], "medicines": [], "appointments": [], "chat_sessions": [], "chat_messages": []}
+
+def _save_db(data):
+    DB_FILE.write_text(json.dumps(data, indent=2, default=str), 'utf-8')
+
+class JSONCollection:
+    def __init__(self, name):
+        self.name = name
+
+    def _reload(self):
+        return _load_db().get(self.name, [])
+
+    def _save(self, items):
+        d = _load_db()
+        d[self.name] = items
+        _save_db(d)
+
+    async def find_one(self, query, projection=None):
+        return await asyncio.to_thread(self._find_one_sync, query, projection)
+
+    def _find_one_sync(self, query, projection=None):
+        for item in self._reload():
+            if all(item.get(k) == v for k, v in query.items()):
+                if projection:
+                    return {k: item[k] for k in projection if k in item and k != "_id"}
+                return {k: v for k, v in item.items() if k != "_id"}
+        return None
+
+    async def insert_one(self, doc):
+        items = self._reload()
+        items.append(doc)
+        self._save(items)
+
+    async def update_one(self, query, update):
+        items = self._reload()
+        for item in items:
+            if all(item.get(k) == v for k, v in query.items()):
+                if "$set" in update:
+                    item.update(update["$set"])
+                self._save(items)
+                return type('Obj', (), {'matched_count': 1})()
+        return type('Obj', (), {'matched_count': 0})()
+
+    async def delete_one(self, query):
+        items = self._reload()
+        items = [i for i in items if not all(i.get(k) == v for k, v in query.items())]
+        self._save(items)
+
+    async def delete_many(self, query):
+        items = self._reload()
+        items = [i for i in items if not all(i.get(k) == v for k, v in query.items())]
+        self._save(items)
+
+    async def find(self, query=None, projection=None, sort=None):
+        items = self._reload()
+        if query:
+            items = [i for i in items if all(i.get(k) == v for k, v in query.items())]
+        if projection:
+            items = [{k: i[k] for k in projection if k in i and k != "_id"} for i in items]
+        else:
+            items = [{k: v for k, v in i.items() if k != "_id"} for i in items]
+        if sort:
+            sk, sd = sort[0]
+            items.sort(key=lambda x: x.get(sk, ""), reverse=(sd > 0))
+        return items
+
+class JSONDB:
+    def __getattr__(self, name):
+        return JSONCollection(name)
+
+db = JSONDB()
 
 app = FastAPI(title="CareAI API")
 api = APIRouter(prefix="/api")
@@ -38,17 +115,17 @@ def now_iso() -> str:
 
 class RegisterIn(BaseModel):
     full_name: str
-    email: EmailStr
+    email: str
     password: str
 
 class LoginIn(BaseModel):
-    email: EmailStr
+    email: str
     password: str
 
 class UserOut(BaseModel):
     id: str
     full_name: str
-    email: EmailStr
+    email: str
 
 class AuthOut(BaseModel):
     token: str
@@ -104,7 +181,7 @@ class Appointment(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     doctor: str
     hospital: Optional[str] = None
-    date: str  # ISO date
+    date: str
     time: str
     reason: Optional[str] = None
     status: str = "upcoming"
@@ -153,7 +230,7 @@ async def current_user(creds: HTTPAuthorizationCredentials = Depends(security)):
         user_id = payload["sub"]
     except jwt.PyJWTError:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid token")
-    user = await db.users.find_one({"id": user_id}, {"_id": 0, "password_hash": 0})
+    user = await db.users.find_one({"id": user_id})
     if not user:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "User not found")
     return user
@@ -164,7 +241,10 @@ async def register(inp: RegisterIn):
     if existing:
         raise HTTPException(400, "Email already registered")
     uid = str(uuid.uuid4())
-    pwd_hash = bcrypt.hashpw(inp.password.encode(), bcrypt.gensalt()).decode()
+    # Run bcrypt in thread to avoid blocking event loop
+    pwd_hash = await asyncio.to_thread(
+        lambda: bcrypt.hashpw(inp.password.encode(), bcrypt.gensalt()).decode()
+    )
     doc = {
         "id": uid,
         "full_name": inp.full_name,
@@ -179,7 +259,13 @@ async def register(inp: RegisterIn):
 @api.post("/auth/login", response_model=AuthOut)
 async def login(inp: LoginIn):
     user = await db.users.find_one({"email": inp.email.lower()})
-    if not user or not bcrypt.checkpw(inp.password.encode(), user["password_hash"].encode()):
+    if not user:
+        raise HTTPException(401, "Invalid credentials")
+    # Run bcrypt check in thread
+    valid = await asyncio.to_thread(
+        lambda: bcrypt.checkpw(inp.password.encode(), user["password_hash"].encode())
+    )
+    if not valid:
         raise HTTPException(401, "Invalid credentials")
     return AuthOut(token=create_token(user["id"]),
                    user=UserOut(id=user["id"], full_name=user["full_name"], email=user["email"]))
@@ -197,14 +283,13 @@ async def get_profile(user=Depends(current_user)):
 @api.put("/profile")
 async def update_profile(inp: ProfileIn, user=Depends(current_user)):
     await db.users.update_one({"id": user["id"]}, {"$set": {"profile": inp.model_dump(exclude_none=True)}})
-    doc = await db.users.find_one({"id": user["id"]}, {"_id": 0})
+    doc = await db.users.find_one({"id": user["id"]})
     return doc.get("profile", {})
 
 # ---------- Emergency Contacts ----------
 @api.get("/contacts", response_model=List[Contact])
 async def list_contacts(user=Depends(current_user)):
-    docs = await db.contacts.find({"user_id": user["id"]}, {"_id": 0, "user_id": 0}).to_list(500)
-    return docs
+    return await db.contacts.find({"user_id": user["id"]})
 
 @api.post("/contacts", response_model=Contact)
 async def add_contact(inp: ContactIn, user=Depends(current_user)):
@@ -217,7 +302,7 @@ async def update_contact(cid: str, inp: ContactIn, user=Depends(current_user)):
     res = await db.contacts.update_one({"id": cid, "user_id": user["id"]}, {"$set": inp.model_dump()})
     if not res.matched_count:
         raise HTTPException(404, "Not found")
-    doc = await db.contacts.find_one({"id": cid}, {"_id": 0, "user_id": 0})
+    doc = await db.contacts.find_one({"id": cid})
     return doc
 
 @api.delete("/contacts/{cid}")
@@ -228,7 +313,7 @@ async def del_contact(cid: str, user=Depends(current_user)):
 # ---------- Medicines ----------
 @api.get("/medicines", response_model=List[Medicine])
 async def list_meds(user=Depends(current_user)):
-    return await db.medicines.find({"user_id": user["id"]}, {"_id": 0, "user_id": 0}).to_list(500)
+    return await db.medicines.find({"user_id": user["id"]})
 
 @api.post("/medicines", response_model=Medicine)
 async def add_med(inp: MedicineIn, user=Depends(current_user)):
@@ -244,7 +329,7 @@ async def del_med(mid: str, user=Depends(current_user)):
 # ---------- Appointments ----------
 @api.get("/appointments", response_model=List[Appointment])
 async def list_appts(user=Depends(current_user)):
-    return await db.appointments.find({"user_id": user["id"]}, {"_id": 0, "user_id": 0}).sort("date", 1).to_list(500)
+    return await db.appointments.find({"user_id": user["id"]})
 
 @api.post("/appointments", response_model=Appointment)
 async def add_appt(inp: AppointmentIn, user=Depends(current_user)):
@@ -260,7 +345,6 @@ async def del_appt(aid: str, user=Depends(current_user)):
 # ---------- Predictors ----------
 @api.post("/predict/heart")
 async def predict_heart(inp: HeartIn):
-    # Rule-based risk % (0-100). Approximate heuristic - NOT medical grade.
     score = 0.0
     score += max(0, (inp.age - 30)) * 0.7
     score += max(0, (inp.systolic_bp - 120)) * 0.4
@@ -290,7 +374,8 @@ async def predict_diabetes(inp: DiabetesIn):
 @api.post("/predict/bmi")
 async def predict_bmi(inp: BMIIn):
     h = inp.height_cm / 100.0
-    if h <= 0: raise HTTPException(400, "Invalid height")
+    if h <= 0:
+        raise HTTPException(400, "Invalid height")
     bmi = inp.weight_kg / (h * h)
     if bmi < 18.5: cat = "Underweight"
     elif bmi < 25: cat = "Normal"
@@ -346,7 +431,7 @@ async def check_symptoms(inp: SymptomsIn):
     results.sort(key=lambda r: r["confidence"], reverse=True)
     return {"results": results[:5]}
 
-# ---------- Chatbot (Claude Sonnet 4.5) ----------
+# ---------- Chatbot (OpenAI GPT-4o-mini) ----------
 SYSTEM_MSG = (
     "You are CareAI, a friendly and empathetic AI health assistant. "
     "You provide general health information, explain symptoms, suggest possible causes, recommend specialists, "
@@ -361,7 +446,8 @@ SYSTEM_MSG = (
 
 @api.get("/chat/sessions")
 async def list_sessions(user=Depends(current_user)):
-    docs = await db.chat_sessions.find({"user_id": user["id"]}, {"_id": 0, "user_id": 0}).sort("updated_at", -1).to_list(100)
+    docs = await db.chat_sessions.find({"user_id": user["id"]})
+    docs.sort(key=lambda x: x.get("updated_at", ""), reverse=True)
     return docs
 
 @api.post("/chat/session")
@@ -376,8 +462,7 @@ async def get_messages(session_id: str, user=Depends(current_user)):
     session = await db.chat_sessions.find_one({"id": session_id, "user_id": user["id"]})
     if not session:
         raise HTTPException(404, "Session not found")
-    msgs = await db.chat_messages.find({"session_id": session_id}, {"_id": 0}).sort("created_at", 1).to_list(1000)
-    return msgs
+    return await db.chat_messages.find({"session_id": session_id})
 
 @api.delete("/chat/{session_id}")
 async def delete_session(session_id: str, user=Depends(current_user)):
@@ -391,53 +476,41 @@ async def chat_message(inp: ChatMsgIn, user=Depends(current_user)):
     if not session:
         raise HTTPException(404, "Session not found")
 
-    # Save user message
     await db.chat_messages.insert_one({
         "session_id": inp.session_id, "role": "user", "content": inp.text, "created_at": now_iso()
     })
 
-    # Load history for context (last 20 messages)
-    history = await db.chat_messages.find({"session_id": inp.session_id}, {"_id": 0}).sort("created_at", 1).to_list(20)
+    history = await db.chat_messages.find({"session_id": inp.session_id})
+    history_list = history[-20:]
 
-    chat = LlmChat(
-        api_key=EMERGENT_LLM_KEY,
-        session_id=inp.session_id,
-        system_message=SYSTEM_MSG,
-    ).with_model("anthropic", "claude-sonnet-4-5-20250929")
+    openai_messages = [{"role": "system", "content": SYSTEM_MSG}]
+    for m in history_list:
+        role = "user" if m["role"] == "user" else "assistant"
+        openai_messages.append({"role": role, "content": m["content"]})
 
-    # Replay prior turns so LlmChat has context (excluding the just-added user msg)
-    prior = history[:-1]
-    for m in prior:
-        # LlmChat auto-tracks history via stream_message, but we start fresh each request.
-        # We'll instead include prior context as a prefix in the user message for reliability.
-        pass
-
-    # Build a prompt including history to keep it simple and reliable
-    history_text = ""
-    for m in prior[-12:]:
-        role = "User" if m["role"] == "user" else "Assistant"
-        history_text += f"\n{role}: {m['content']}"
-    prompt = (history_text + f"\nUser: {inp.text}\nAssistant:").strip() if history_text else inp.text
+    client_openai = AsyncOpenAI(api_key=OPENAI_API_KEY)
 
     async def event_gen():
         full = ""
         try:
-            async for ev in chat.stream_message(UserMessage(text=prompt)):
-                if isinstance(ev, TextDelta):
-                    full += ev.content
-                    yield f"data: {ev.content}\n\n".replace("\n\n", "\ndata_end\n\n").replace("data_end", "")
-                    # Simple SSE - send chunks
-                elif isinstance(ev, StreamDone):
-                    break
+            stream = await client_openai.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=openai_messages,
+                max_tokens=4096,
+                stream=True,
+            )
+            async for chunk in stream:
+                delta = chunk.choices[0].delta if chunk.choices else None
+                if delta and delta.content:
+                    full += delta.content
+                    yield f"data: {delta.content}\n\n"
         except Exception as e:
             logger.exception("chat stream error")
             full = full or f"Sorry, I had trouble responding: {e}"
             yield f"data: {full}\n\n"
-        # Save assistant message
         await db.chat_messages.insert_one({
             "session_id": inp.session_id, "role": "assistant", "content": full, "created_at": now_iso()
         })
-        # Update session title/updated_at
         title_update = {"updated_at": now_iso()}
         if session.get("title") in (None, "New chat"):
             title_update["title"] = inp.text[:40]
@@ -463,7 +536,3 @@ app.add_middleware(
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
-
-@app.on_event("shutdown")
-async def shutdown_db_client():
-    client.close()
