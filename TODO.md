@@ -1,30 +1,15 @@
-# CareAI Project Fixes — TODO
+# TODO - Fix Vercel Deployment ✅
 
-## Phase 1: Backend Fixes
-- [x] P1.1: Clean up `server.py` — remove duplicate first section
-- [ ] P1.2: Create `.env` template with all required variables
-- [ ] P1.3: Install Python dependencies
-
-## Phase 2: Frontend Project Structure
-- [ ] P2.1: Create `craco.config.js` with `@/` alias
-- [ ] P2.2: Create `tailwind.config.js` and `postcss.config.js`
-- [ ] P2.3: Create `src/` directory structure
-- [ ] P2.4: Move files to proper locations
-
-## Phase 3: Missing Files
-- [ ] P3.1: Create `src/pages/Nearby.jsx`
-- [ ] P3.2: Create `src/components/ui/sonner.jsx`
-- [ ] P3.3: Fix `guidlines.json` — add opening `{`
-- [ ] P3.4: Remove empty `authcontext` file
-
-## Phase 4: Fix `app.js` (now `src/App.js`)
-- [ ] P4.1: Remove duplicate first App component
-- [ ] P4.2: Clean up imports and routes
-
-## Phase 5: Install Dependencies
-- [ ] P5.1: Run `npm install`
-- [ ] P5.2: Run backend setup
-
-## Phase 6: Clean up
-- [ ] P6.1: Remove leftover original files from root
-
+- [x] Step 1: Fix package.json - Remove conflicting dependencies, fix version mismatches
+- [x] Step 2: Create vercel.json
+- [x] Step 3: Create .env file
+- [x] Step 4: Create public/_redirects
+- [x] Step 5: Fix package.json - Remove `@emergentbase/visual-edits` external URL dep
+- [x] Step 6: Fix package.json - Remove conflicting eslint@9.23.0, use eslint@^8.57.0
+- [x] Step 7: Fix package.json - Downgrade `date-fns` from 4.1.0 to ^3.6.0 (compat with react-day-picker)
+- [x] Step 8: Fix package.json - Fix `lodash` version from ^4.18.1 to 4.17.21
+- [x] Step 9: Fix package.json - Trim resolutions block to only necessary entries
+- [x] Step 10: Fix src/index.css - Remove duplicate tailwind directives (declared twice)
+- [x] Step 11: Fix src/App.css - Clean up boilerplate CSS
+- [x] Step 12: Verify `npm install` works without `--legacy-peer-deps` ✅
+- [x] Step 13: Verify `npm run build` works ✅ (Build successful!)
