@@ -17,6 +17,14 @@ import Contacts from "@/pages/Contacts";
 import Nearby from "@/pages/Nearby";
 import Medicines from "@/pages/Medicines";
 import Appointments from "@/pages/Appointments";
+import Family from "@/pages/Family";
+import Caregivers from "@/pages/Caregivers";
+import MedicineScanner from "@/pages/MedicineScanner";
+import HealthScore from "@/pages/HealthScore";
+import Reminders from "@/pages/Reminders";
+import KnowledgeGraph from "@/pages/KnowledgeGraph";
+import HealthEducation from "@/pages/HealthEducation";
+import LabTests from "@/pages/LabTests";
 
 function Protected({ children }) {
   const { user, loading } = useAuth();
@@ -28,7 +36,7 @@ function Protected({ children }) {
 
 export default function App() {
   return (
-    <div className="App">
+    <div className="App min-h-screen bg-[var(--background)] text-[color:var(--foreground)]">
       <AuthProvider>
         <BrowserRouter>
           <Routes>
@@ -45,6 +53,14 @@ export default function App() {
               <Route path="/app/nearby" element={<Nearby />} />
               <Route path="/app/medicines" element={<Medicines />} />
               <Route path="/app/appointments" element={<Appointments />} />
+              <Route path="/app/family" element={<Family />} />
+              <Route path="/app/caregivers" element={<Caregivers />} />
+              <Route path="/app/health-education" element={<HealthEducation />} />
+              <Route path="/app/medicine-scanner" element={<MedicineScanner />} />
+              <Route path="/app/health-score" element={<HealthScore />} />
+              <Route path="/app/graph" element={<KnowledgeGraph />} />
+              <Route path="/app/reminders" element={<Reminders />} />
+              <Route path="/app/lab-tests" element={<LabTests />} />
             </Route>
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
@@ -54,4 +70,3 @@ export default function App() {
     </div>
   );
 }
-

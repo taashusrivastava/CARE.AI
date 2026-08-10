@@ -3,12 +3,13 @@ import { Link } from "react-router-dom";
 import {
   Heart, MessageCircle, Stethoscope, MapPin, Shield, Sparkles,
   Activity, Pill, CalendarClock, Users, Brain, ArrowRight,
-  Phone, Syringe
+  Phone, Syringe, HeartPulse, ScanLine, Home
 } from "lucide-react";
+import ThemePicker from "@/components/ThemePicker";
 
 const features = [
   { icon: MessageCircle, title: "AI Health Chat",
-    desc: "Talk to CareAI, powered by GPT-4o-mini. Get warm health guidance anytime.",
+    desc: "Talk to CareAI with voice or text, powered by GPT-4o-mini. Get warm health guidance anytime.",
     color: "bg-purple-100 text-purple-700" },
   { icon: Stethoscope, title: "Symptom Checker",
     desc: "Select symptoms from 30+ options. Match against 9 conditions with confidence scores.",
@@ -22,9 +23,18 @@ const features = [
   { icon: CalendarClock, title: "Appointments",
     desc: "Book and manage doctor visits. Keep every appointment organized in one place.",
     color: "bg-indigo-100 text-indigo-700" },
-  { icon: Users, title: "Emergency Contacts",
+{ icon: Users, title: "Emergency Contacts",
     desc: "Store loved ones and reach instantly. One-tap call or SMS from SOS button.",
     color: "bg-orange-100 text-orange-700" },
+  { icon: HeartPulse, title: "Health Score",
+    desc: "Get a personalized wellness score with sleep, diet, stress and activity insights.",
+    color: "bg-lime-100 text-lime-700" },
+  { icon: ScanLine, title: "Medicine Scanner",
+    desc: "Look up uses, dosage, side effects, interactions and alternatives for common medicines.",
+    color: "bg-cyan-100 text-cyan-700" },
+  { icon: Home, title: "Family Healthcare",
+    desc: "Track health details, allergies, medications and vaccination schedules for loved ones.",
+    color: "bg-teal-100 text-teal-700" },
 ];
 
 const stats = [
@@ -35,6 +45,26 @@ const stats = [
 ];
 
 export default function Landing() {
+  const [installable, setInstallable] = React.useState(false);
+
+  React.useEffect(() => {
+    setInstallable(!!window.careaiDeferredInstallPrompt);
+    const handler = () => setInstallable(true);
+    window.addEventListener('beforeinstallprompt', handler);
+    return () => window.removeEventListener('beforeinstallprompt', handler);
+  }, []);
+
+  const installApp = async () => {
+    if (window.careaiDeferredInstallPrompt) {
+      window.careaiDeferredInstallPrompt.prompt();
+      const choice = await window.careaiDeferredInstallPrompt.userChoice;
+      if (choice.outcome === 'accepted') {
+        setInstallable(false);
+      }
+      window.careaiDeferredInstallPrompt = null;
+    }
+  };
+
   return (
     <div className="pastel-bg overflow-hidden">
 
@@ -46,7 +76,8 @@ export default function Landing() {
           </div>
           <span className="font-display text-2xl text-slate-800">CareAI</span>
         </div>
-        <div className="flex items-center gap-2">
+<div className="flex items-center gap-2">
+          <ThemePicker />
           <Link to="/login" data-testid="nav-login"
             className="px-5 py-2 rounded-full text-sm font-semibold text-slate-700 hover:bg-white/70 transition-all">
             Sign in
@@ -56,10 +87,11 @@ export default function Landing() {
             Get started
           </Link>
         </div>
-      </nav>
+</nav>
 
-      {/* Hero Section */}
-      <section className="relative z-10 max-w-7xl mx-auto px-5 lg:px-8 pt-6 lg:pt-14 pb-16 lg:pb-24 grid lg:grid-cols-12 gap-8 items-center">
+      {/* Hero */}
+      <section className="relative z-10 max-w-7xl mx-auto px-5 lg:px-8 pt-10 pb-20">
+        <div className="grid lg:grid-cols-12 gap-8 items-center">
 
         {/* Left column */}
         <div className="lg:col-span-7">
@@ -89,6 +121,12 @@ export default function Landing() {
               className="px-7 py-3.5 rounded-full bg-white/80 border-2 border-white font-semibold text-slate-700 hover:bg-white hover:border-rose-200 transition-all">
               I already have one
             </Link>
+            {installable && (
+              <button onClick={installApp}
+                className="px-7 py-3.5 rounded-full bg-emerald-500 text-white font-semibold hover:bg-emerald-600 transition-all">
+                Install CareAI
+              </button>
+            )}
           </div>
           <div className="mt-10 grid sm:grid-cols-3 gap-3 max-w-xl">
             {[
@@ -108,6 +146,8 @@ export default function Landing() {
         {/* Right column */}
         <div className="lg:col-span-5">
           <div className="relative aspect-square max-w-md mx-auto">
+            <span className="absolute -top-5 left-6 w-12 h-12 rounded-full bg-rose-200/80 doodle-dot"></span>
+            <span className="absolute bottom-4 -right-4 w-14 h-14 rounded-full bg-purple-200/80 doodle-ring"></span>
             <div className="absolute inset-0 rounded-[3rem] bg-gradient-to-br from-rose-100 via-pink-100 via-purple-100 to-blue-100 animate-pulse opacity-80"></div>
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="w-64 h-64 sm:w-72 sm:h-72 rounded-full bg-gradient-to-br from-rose-200 via-purple-200 to-blue-200 shadow-2xl flex items-center justify-center float-slow border-4 border-white">
@@ -138,7 +178,7 @@ export default function Landing() {
             </div>
           </div>
         </div>
-
+        </div>
       </section>
 
       {/* Stats Bar */}
@@ -169,7 +209,9 @@ export default function Landing() {
         </div>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
           {features.map(({ icon: Icon, title, desc, color }) => (
-            <div key={title} className="glass rounded-3xl p-6 hover:scale-[1.02] transition-all group cursor-default">
+            <div key={title} className="glass rounded-3xl p-6 hover:scale-[1.02] transition-all group cursor-default relative overflow-hidden">
+              <span className="absolute -top-3 -right-3 w-10 h-10 rounded-full bg-white/80 doodle-ring"></span>
+              <span className="absolute bottom-4 left-4 w-6 h-6 rounded-full bg-rose-200/85 doodle-dot"></span>
               <div className={"w-12 h-12 rounded-2xl grid place-items-center " + color + " mb-4 group-hover:scale-110 transition-transform"}>
                 <Icon className="w-6 h-6" strokeWidth={2.5} />
               </div>

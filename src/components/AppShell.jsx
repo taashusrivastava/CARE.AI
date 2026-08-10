@@ -1,16 +1,25 @@
 import React, { useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
-import { Heart, MessageCircle, Stethoscope, Activity, User, Users, MapPin, Pill, CalendarClock, LogOut, Menu, X } from "lucide-react";
+import { Heart, MessageCircle, Stethoscope, Activity, User, Users, MapPin, Pill, CalendarClock, LogOut, Menu, X, HeartPulse, Home, ScanLine, Network, Bell, FlaskConical, ShieldCheck, Info } from "lucide-react";
 import SosButton from "@/components/SosButton";
+import ThemePicker from "@/components/ThemePicker";
 
 const links = [
   { to: "/app", label: "Dashboard", icon: Heart, exact: true },
   { to: "/app/chat", label: "AI Assistant", icon: MessageCircle },
   { to: "/app/symptoms", label: "Symptom Checker", icon: Stethoscope },
-  { to: "/app/risk", label: "Risk Predictors", icon: Activity },
-  { to: "/app/nearby", label: "Nearby Hospitals", icon: MapPin },
+{ to: "/app/risk", label: "Risk Predictors", icon: Activity },
   { to: "/app/medicines", label: "Medicines", icon: Pill },
+  { to: "/app/medicine-scanner", label: "Medicine Scanner", icon: ScanLine },
+{ to: "/app/health-score", label: "Health Score", icon: HeartPulse },
+  { to: "/app/graph", label: "Knowledge Graph", icon: Network },
+  { to: "/app/family", label: "Family", icon: Home },
+  { to: "/app/caregivers", label: "Caregivers", icon: ShieldCheck },
+  { to: "/app/health-education", label: "Health Education", icon: Info },
+  { to: "/app/nearby", label: "Nearby Hospitals", icon: MapPin },
+  { to: "/app/reminders", label: "Smart Reminders", icon: Bell },
+  { to: "/app/lab-tests", label: "Lab Test Center", icon: FlaskConical },
   { to: "/app/appointments", label: "Appointments", icon: CalendarClock },
   { to: "/app/contacts", label: "Emergency Contacts", icon: Users },
   { to: "/app/profile", label: "Profile", icon: User },
@@ -25,16 +34,19 @@ export default function AppShell() {
 
   return (
     <div className="pastel-bg">
-      <div className="lg:hidden sticky top-0 z-40 glass-strong px-4 py-3 flex items-center justify-between">
+<div className="lg:hidden sticky top-0 z-40 glass-strong px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="w-9 h-9 rounded-2xl bg-rose-200 grid place-items-center">
             <Heart className="w-5 h-5 text-rose-700" strokeWidth={2.5} />
           </div>
           <span className="font-display text-xl">CareAI</span>
         </div>
-        <button data-testid="mobile-menu-toggle" onClick={() => setOpen(!open)} className="p-2 rounded-xl bg-white/70">
-          {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-        </button>
+        <div className="flex items-center gap-2">
+          <ThemePicker />
+          <button data-testid="mobile-menu-toggle" onClick={() => setOpen(!open)} className="p-2 rounded-xl bg-white/70">
+            {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
+        </div>
       </div>
 
       <div className="flex">
@@ -50,7 +62,7 @@ export default function AppShell() {
               </div>
             </div>
 
-            <nav className="mt-6 flex-1 space-y-1">
+            <nav className="mt-6 flex-1 space-y-1 overflow-y-auto">
               {links.map(({ to, label, icon: Icon, exact }) => (
                 <NavLink
                   key={to}
@@ -83,7 +95,10 @@ export default function AppShell() {
           </div>
         </aside>
 
-        <main className="flex-1 min-w-0 p-4 lg:p-8">
+<main className="flex-1 min-w-0 p-4 lg:p-8">
+          <div className="flex justify-end mb-4">
+            <ThemePicker />
+          </div>
           <Outlet />
         </main>
       </div>

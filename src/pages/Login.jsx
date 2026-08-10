@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { Heart, Mail, Lock } from "lucide-react";
 import { toast } from "sonner";
+import ThemePicker from "@/components/ThemePicker";
 
 export default function Login() {
   const { login } = useAuth();
@@ -24,7 +25,11 @@ export default function Login() {
   };
 
   return (
-    <div className="pastel-bg grid place-items-center p-6">
+    <div className="pastel-bg relative min-h-screen">
+      <div className="absolute top-4 right-4 z-20">
+        <ThemePicker />
+      </div>
+      <div className="min-h-screen grid place-items-center p-6">
       <div className="w-full max-w-md">
         <Link to="/" className="flex items-center gap-2 justify-center mb-8">
           <div className="w-10 h-10 rounded-2xl bg-rose-200 grid place-items-center">
@@ -57,9 +62,10 @@ export default function Login() {
               {busy ? "Signing in…" : "Sign in"}
             </button>
           </form>
-          <div className="text-sm text-slate-600 mt-6 text-center">
+<div className="text-sm text-slate-600 mt-6 text-center">
             New here? <Link to="/register" className="font-bold text-rose-600" data-testid="link-register">Create an account</Link>
           </div>
+        </div>
         </div>
       </div>
     </div>

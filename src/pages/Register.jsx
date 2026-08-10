@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { Heart, Mail, Lock, User } from "lucide-react";
 import { toast } from "sonner";
+import ThemePicker from "@/components/ThemePicker";
 
 export default function Register() {
   const { register } = useAuth();
@@ -26,7 +27,11 @@ export default function Register() {
   };
 
   return (
-    <div className="pastel-bg grid place-items-center p-6">
+    <div className="pastel-bg relative min-h-screen">
+      <div className="absolute top-4 right-4 z-20">
+        <ThemePicker />
+      </div>
+      <div className="min-h-screen grid place-items-center p-6">
       <div className="w-full max-w-md">
         <Link to="/" className="flex items-center gap-2 justify-center mb-8">
           <div className="w-10 h-10 rounded-2xl bg-rose-200 grid place-items-center">
@@ -70,6 +75,7 @@ export default function Register() {
           <div className="text-sm text-slate-600 mt-6 text-center">
             Already registered? <Link to="/login" className="font-bold text-rose-600" data-testid="link-login">Sign in</Link>
           </div>
+        </div>
         </div>
       </div>
     </div>

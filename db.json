@@ -37,6 +37,46 @@
         "emergency_contact_name": "jyoti srivastava",
         "emergency_contact_phone": "9026186842"
       }
+    },
+    {
+      "id": "ee0b06b3-d8ca-4747-846d-40ed50e27c18",
+      "full_name": "Test User",
+      "email": "test@care.ai",
+      "password_hash": "$2b$12$H/UWI2DDBZpKIWR7VkTuTu.u5i8rzjGNt9DGgZ9PsIOL/0EBlvas6",
+      "created_at": "2026-08-09T14:26:10.543982+00:00",
+      "profile": {}
+    },
+    {
+      "id": "5a1dd744-db8d-49da-b4d1-465b42543fd7",
+      "full_name": "Chat Test",
+      "email": "chat@test.ai",
+      "password_hash": "$2b$12$gmIdPsBz9EZcEVu5Q4QhPemxgIb5.vxwEGrq1KUfvnFgdWdGNslki",
+      "created_at": "2026-08-09T14:36:59.112027+00:00",
+      "profile": {}
+    },
+    {
+      "id": "0411eaad-f468-40ca-a193-bdd208243208",
+      "full_name": "Mode Test",
+      "email": "mode5d04f649@test.com",
+      "password_hash": "$2b$12$S1RQWVBWvlaxzTuig9DAN.fNKtVrAIEccKOTxAtz/6o84G8PWLUyW",
+      "created_at": "2026-08-09T15:57:37.502040+00:00",
+      "profile": {}
+    },
+    {
+      "id": "928014c0-f578-4115-859d-80e7fba2c78a",
+      "full_name": "Reminder Test",
+      "email": "reminder_test@care.ai",
+      "password_hash": "$2b$12$lniBeYU6tNLqW9okzEM/euMwgg5wLGUotcfHPXrocTetrjanPDjIe",
+      "created_at": "2026-08-09T16:31:46.798822+00:00",
+      "profile": {}
+    },
+    {
+      "id": "acd9826b-2579-4b7c-a4b6-e315242e00fc",
+      "full_name": "LoginFix",
+      "email": "loginfix@care.ai",
+      "password_hash": "$2b$12$TAEsQV.K9mzZvmPVBMTq2OIv/53btJ.bCA2yjVYcIjSbiCHhX05LS",
+      "created_at": "2026-08-09T16:44:07.818096+00:00",
+      "profile": {}
     }
   ],
   "contacts": [
@@ -73,6 +113,342 @@
       "user_id": "a304e5b5-3ed3-4663-a7b5-9f3303ef303e"
     }
   ],
-  "chat_sessions": [],
-  "chat_messages": []
+  "chat_sessions": [
+    {
+      "id": "2d152bd7-00d4-40bb-b477-cc37647ec211",
+      "user_id": "5a1dd744-db8d-49da-b4d1-465b42543fd7",
+      "title": "New chat",
+      "created_at": "2026-08-09T14:36:59.127938+00:00",
+      "updated_at": "2026-08-09T14:36:59.127938+00:00"
+    },
+    {
+      "id": "faa7b5b6-a3fd-41a4-9903-da7713d735c5",
+      "user_id": "ee0b06b3-d8ca-4747-846d-40ed50e27c18",
+      "title": "New chat",
+      "created_at": "2026-08-09T14:37:40.713967+00:00",
+      "updated_at": "2026-08-09T14:37:40.713967+00:00"
+    },
+    {
+      "id": "7977bb4e-a7d1-4556-9661-9b874b976370",
+      "user_id": "ee0b06b3-d8ca-4747-846d-40ed50e27c18",
+      "title": "New chat",
+      "created_at": "2026-08-09T14:38:17.567112+00:00",
+      "updated_at": "2026-08-09T14:38:17.567112+00:00"
+    },
+    {
+      "id": "fb5d6697-a064-46a5-9e62-b6711ca54870",
+      "user_id": "ee0b06b3-d8ca-4747-846d-40ed50e27c18",
+      "title": "What is paracetamol used for?",
+      "created_at": "2026-08-09T14:42:48.277162+00:00",
+      "updated_at": "2026-08-09T14:42:50.393451+00:00"
+    },
+    {
+      "id": "a5c53a26-cbcd-4955-a59a-234cef2e2c4f",
+      "user_id": "a304e5b5-3ed3-4663-a7b5-9f3303ef303e",
+      "title": "helo!",
+      "created_at": "2026-08-09T15:53:00.646671+00:00",
+      "updated_at": "2026-08-10T14:52:55.598706+00:00"
+    },
+    {
+      "id": "8b52e279-b350-4e7c-badb-29a1259ffdd6",
+      "user_id": "0411eaad-f468-40ca-a193-bdd208243208",
+      "title": "I have a mild headache and fatigue",
+      "created_at": "2026-08-09T15:57:39.538671+00:00",
+      "updated_at": "2026-08-09T15:57:41.647170+00:00"
+    }
+  ],
+  "chat_messages": [
+    {
+      "session_id": "2d152bd7-00d4-40bb-b477-cc37647ec211",
+      "role": "user",
+      "content": "What is paracetamol used for?",
+      "created_at": "2026-08-09T14:36:59.169584+00:00"
+    },
+    {
+      "session_id": "faa7b5b6-a3fd-41a4-9903-da7713d735c5",
+      "role": "user",
+      "content": "What is paracetamol used for?",
+      "created_at": "2026-08-09T14:37:40.717886+00:00"
+    },
+    {
+      "session_id": "7977bb4e-a7d1-4556-9661-9b874b976370",
+      "role": "user",
+      "content": "What is paracetamol used for?",
+      "created_at": "2026-08-09T14:38:19.628385+00:00"
+    },
+    {
+      "session_id": "fb5d6697-a064-46a5-9e62-b6711ca54870",
+      "role": "user",
+      "content": "What is paracetamol used for?",
+      "created_at": "2026-08-09T14:42:50.318433+00:00"
+    },
+    {
+      "session_id": "fb5d6697-a064-46a5-9e62-b6711ca54870",
+      "role": "assistant",
+      "content": "**Paracetamol (Acetaminophen)**\n\n\u2022 Uses: Reduces fever, relieves mild to moderate pain (headache, toothache, muscle aches)\n\u2022 Dosage: Adults: 500-1000mg every 4-6 hours, max 4000mg/day. Children: 10-15mg/kg every 4-6 hours\n\u2022 Side effects: Nausea, rash, liver damage (with overdose), allergic reactions\n\u2022 Interactions: Warfarin (increased bleeding risk), Alcohol (increased liver toxicity), Carbamazepine\n\u2022 Storage: Store below 25\u00b0C, protect from light\n\nAlways follow your doctor or pharmacist's instructions and the label. This is educational information, not medical advice.",
+      "created_at": "2026-08-09T14:42:50.391453+00:00"
+    },
+    {
+      "session_id": "8b52e279-b350-4e7c-badb-29a1259ffdd6",
+      "role": "user",
+      "content": "I have a mild headache and fatigue",
+      "created_at": "2026-08-09T15:57:41.567375+00:00"
+    },
+    {
+      "session_id": "8b52e279-b350-4e7c-badb-29a1259ffdd6",
+      "role": "assistant",
+      "content": "Based on the symptoms you described, a possible consideration is **Influenza (Flu)** (Moderate severity).\n\n\u2022 Common symptoms: fever, body pain, fatigue, cough, headache, chills\n\u2022 Specialist to see: General Physician\n\u2022 Possible tests: Flu PCR, CBC\n\nThis is a heuristic suggestion, not a diagnosis. Please consult a qualified healthcare professional for a proper evaluation.",
+      "created_at": "2026-08-09T15:57:41.642169+00:00"
+    },
+    {
+      "session_id": "a5c53a26-cbcd-4955-a59a-234cef2e2c4f",
+      "role": "user",
+      "content": "helo!",
+      "created_at": "2026-08-10T13:52:26.719018+00:00"
+    },
+    {
+      "session_id": "a5c53a26-cbcd-4955-a59a-234cef2e2c4f",
+      "role": "assistant",
+      "content": "I'm CareAI, your health guidance assistant. I can help you understand symptoms, learn about medicines, and get wellness tips.\n\nFor example, you could ask: \"What is paracetamol used for?\" or \"I have a headache and nausea - what might that be?\"\n\nPlease note this is informational guidance only and not a substitute for professional medical advice. For emergencies, always call your local emergency services.",
+      "created_at": "2026-08-10T13:52:26.813808+00:00"
+    },
+    {
+      "session_id": "a5c53a26-cbcd-4955-a59a-234cef2e2c4f",
+      "role": "user",
+      "content": "will you talk to me in hindi",
+      "created_at": "2026-08-10T13:52:39.005369+00:00"
+    },
+    {
+      "session_id": "a5c53a26-cbcd-4955-a59a-234cef2e2c4f",
+      "role": "assistant",
+      "content": "I'm CareAI, your health guidance assistant. I can help you understand symptoms, learn about medicines, and get wellness tips.\n\nFor example, you could ask: \"What is paracetamol used for?\" or \"I have a headache and nausea - what might that be?\"\n\nPlease note this is informational guidance only and not a substitute for professional medical advice. For emergencies, always call your local emergency services.",
+      "created_at": "2026-08-10T13:52:39.075817+00:00"
+    },
+    {
+      "session_id": "a5c53a26-cbcd-4955-a59a-234cef2e2c4f",
+      "role": "user",
+      "content": "hindi m baat kriye",
+      "created_at": "2026-08-10T13:52:48.411440+00:00"
+    },
+    {
+      "session_id": "a5c53a26-cbcd-4955-a59a-234cef2e2c4f",
+      "role": "assistant",
+      "content": "I'm CareAI, your health guidance assistant. I can help you understand symptoms, learn about medicines, and get wellness tips.\n\nFor example, you could ask: \"What is paracetamol used for?\" or \"I have a headache and nausea - what might that be?\"\n\nPlease note this is informational guidance only and not a substitute for professional medical advice. For emergencies, always call your local emergency services.",
+      "created_at": "2026-08-10T13:52:48.479629+00:00"
+    },
+    {
+      "session_id": "a5c53a26-cbcd-4955-a59a-234cef2e2c4f",
+      "role": "user",
+      "content": "hello",
+      "created_at": "2026-08-10T14:49:04.494265+00:00"
+    },
+    {
+      "session_id": "a5c53a26-cbcd-4955-a59a-234cef2e2c4f",
+      "role": "assistant",
+      "content": "Hello! \ud83d\udc4b I'm CareAI, your warm health assistant. I can help you with:\n\n\u2022 Understanding symptoms\n\u2022 Learning about medicines\n\u2022 Wellness and healthy habits\n\nWhat would you like to talk about today? (Remember, I'm here for guidance, not diagnosis.)",
+      "created_at": "2026-08-10T14:49:04.577840+00:00"
+    },
+    {
+      "session_id": "a5c53a26-cbcd-4955-a59a-234cef2e2c4f",
+      "role": "user",
+      "content": "namaste",
+      "created_at": "2026-08-10T14:49:09.346063+00:00"
+    },
+    {
+      "session_id": "a5c53a26-cbcd-4955-a59a-234cef2e2c4f",
+      "role": "assistant",
+      "content": "I'm CareAI, your health guidance assistant. I can help you understand symptoms, learn about medicines, and get wellness tips.\n\nFor example, you could ask: \"What is paracetamol used for?\" or \"I have a headache and nausea - what might that be?\"\n\nPlease note this is informational guidance only and not a substitute for professional medical advice. For emergencies, always call your local emergency services.",
+      "created_at": "2026-08-10T14:49:09.429703+00:00"
+    },
+    {
+      "session_id": "a5c53a26-cbcd-4955-a59a-234cef2e2c4f",
+      "role": "user",
+      "content": "\u0939\u0947\u0932\u094b",
+      "created_at": "2026-08-10T14:49:19.277133+00:00"
+    },
+    {
+      "session_id": "a5c53a26-cbcd-4955-a59a-234cef2e2c4f",
+      "role": "assistant",
+      "content": "I'm CareAI, your health guidance assistant. I can help you understand symptoms, learn about medicines, and get wellness tips.\n\nFor example, you could ask: \"What is paracetamol used for?\" or \"I have a headache and nausea - what might that be?\"\n\nPlease note this is informational guidance only and not a substitute for professional medical advice. For emergencies, always call your local emergency services.",
+      "created_at": "2026-08-10T14:49:19.339155+00:00"
+    },
+    {
+      "session_id": "a5c53a26-cbcd-4955-a59a-234cef2e2c4f",
+      "role": "user",
+      "content": "\u0939\u093f\u0902\u0926\u0940 \u092e\u0947\u0902 \u092c\u093e\u0924 \u0915\u0930\u093f\u090f",
+      "created_at": "2026-08-10T14:49:30.065488+00:00"
+    },
+    {
+      "session_id": "a5c53a26-cbcd-4955-a59a-234cef2e2c4f",
+      "role": "assistant",
+      "content": "I'm CareAI, your health guidance assistant. I can help you understand symptoms, learn about medicines, and get wellness tips.\n\nFor example, you could ask: \"What is paracetamol used for?\" or \"I have a headache and nausea - what might that be?\"\n\nPlease note this is informational guidance only and not a substitute for professional medical advice. For emergencies, always call your local emergency services.",
+      "created_at": "2026-08-10T14:49:30.148754+00:00"
+    },
+    {
+      "session_id": "a5c53a26-cbcd-4955-a59a-234cef2e2c4f",
+      "role": "user",
+      "content": "mujhe apse whatsup language m baat krni h ?/ would you do?",
+      "created_at": "2026-08-10T14:51:41.807957+00:00"
+    },
+    {
+      "session_id": "a5c53a26-cbcd-4955-a59a-234cef2e2c4f",
+      "role": "assistant",
+      "content": "I'm CareAI, your health guidance assistant. I can help you understand symptoms, learn about medicines, and get wellness tips.\n\nFor example, you could ask: \"What is paracetamol used for?\" or \"I have a headache and nausea - what might that be?\"\n\nPlease note this is informational guidance only and not a substitute for professional medical advice. For emergencies, always call your local emergency services.",
+      "created_at": "2026-08-10T14:51:41.880120+00:00"
+    },
+    {
+      "session_id": "a5c53a26-cbcd-4955-a59a-234cef2e2c4f",
+      "role": "user",
+      "content": "hindi m baat kriye",
+      "created_at": "2026-08-10T14:52:12.407189+00:00"
+    },
+    {
+      "session_id": "a5c53a26-cbcd-4955-a59a-234cef2e2c4f",
+      "role": "assistant",
+      "content": "I'm CareAI, your health guidance assistant. I can help you understand symptoms, learn about medicines, and get wellness tips.\n\nFor example, you could ask: \"What is paracetamol used for?\" or \"I have a headache and nausea - what might that be?\"\n\nPlease note this is informational guidance only and not a substitute for professional medical advice. For emergencies, always call your local emergency services.",
+      "created_at": "2026-08-10T14:52:12.453759+00:00"
+    },
+    {
+      "session_id": "a5c53a26-cbcd-4955-a59a-234cef2e2c4f",
+      "role": "user",
+      "content": "i have a headache",
+      "created_at": "2026-08-10T14:52:29.953531+00:00"
+    },
+    {
+      "session_id": "a5c53a26-cbcd-4955-a59a-234cef2e2c4f",
+      "role": "assistant",
+      "content": "Based on the symptoms you described, a possible consideration is **Influenza (Flu)** (Moderate severity).\n\n\u2022 Common symptoms: fever, body pain, fatigue, cough, headache, chills\n\u2022 Specialist to see: General Physician\n\u2022 Possible tests: Flu PCR, CBC\n\nThis is a heuristic suggestion, not a diagnosis. Please consult a qualified healthcare professional for a proper evaluation.",
+      "created_at": "2026-08-10T14:52:30.028166+00:00"
+    },
+    {
+      "session_id": "a5c53a26-cbcd-4955-a59a-234cef2e2c4f",
+      "role": "user",
+      "content": "what should i do in this situation?",
+      "created_at": "2026-08-10T14:52:55.537606+00:00"
+    },
+    {
+      "session_id": "a5c53a26-cbcd-4955-a59a-234cef2e2c4f",
+      "role": "assistant",
+      "content": "I'm CareAI, your health guidance assistant. I can help you understand symptoms, learn about medicines, and get wellness tips.\n\nFor example, you could ask: \"What is paracetamol used for?\" or \"I have a headache and nausea - what might that be?\"\n\nPlease note this is informational guidance only and not a substitute for professional medical advice. For emergencies, always call your local emergency services.",
+      "created_at": "2026-08-10T14:52:55.596800+00:00"
+    }
+  ],
+  "family_members": [
+    {
+      "id": "768f561a-6e68-4621-82b5-5590dd5dc3fb",
+      "user_id": "ee0b06b3-d8ca-4747-846d-40ed50e27c18",
+      "name": "Mom",
+      "relationship": "Mother",
+      "age": 55,
+      "gender": null,
+      "blood_group": null,
+      "medical_history": null,
+      "allergies": null,
+      "medications": null,
+      "vaccination_schedule": null,
+      "contact_number": null,
+      "emergency_contact_phone": null,
+      "created_at": "2026-08-09T14:26:10.626486+00:00"
+    },
+    {
+      "id": "b5a8486c-2aa9-4e69-a8ac-8578fdfe40f4",
+      "user_id": "a304e5b5-3ed3-4663-a7b5-9f3303ef303e",
+      "name": "jyoti srivastava",
+      "relationship": "mother",
+      "age": 43,
+      "gender": "female",
+      "blood_group": "B+",
+      "medical_history": "sugar",
+      "allergies": "nothing",
+      "medications": "sugar medications",
+      "vaccination_schedule": "no",
+      "contact_number": "78945612336",
+      "emergency_contact_phone": "",
+      "created_at": "2026-08-09T15:51:53.415000+00:00"
+    },
+    {
+      "id": "2f23f451-1dc1-434d-98b5-37010fad8144",
+      "user_id": "a304e5b5-3ed3-4663-a7b5-9f3303ef303e",
+      "name": "abhilekh srivastava",
+      "relationship": "father",
+      "age": 45,
+      "gender": "male",
+      "blood_group": "O+",
+      "medical_history": "no",
+      "allergies": "no",
+      "medications": "no",
+      "vaccination_schedule": "no",
+      "contact_number": "3698521478",
+      "emergency_contact_phone": "",
+      "created_at": "2026-08-09T15:52:38.005244+00:00"
+    }
+  ],
+  "reminders": [
+    {
+      "id": "fb03557c-5db9-4319-8aca-518439ed5447",
+      "type": "hydration",
+      "title": "Drink water",
+      "schedule_time": "14:00",
+      "days": [
+        "Mon",
+        "Tue",
+        "Wed",
+        "Thu",
+        "Fri",
+        "Sat",
+        "Sun"
+      ],
+      "notes": "",
+      "enabled": true,
+      "user_id": "928014c0-f578-4115-859d-80e7fba2c78a"
+    },
+    {
+      "id": "f1a79667-463a-4d72-885c-596cf1c57e0f",
+      "type": "hydration",
+      "title": "Drink water",
+      "schedule_time": "14:00",
+      "days": [
+        "Mon",
+        "Tue",
+        "Wed",
+        "Thu",
+        "Fri",
+        "Sat",
+        "Sun"
+      ],
+      "notes": "",
+      "enabled": true,
+      "user_id": "928014c0-f578-4115-859d-80e7fba2c78a"
+    },
+    {
+      "id": "57eedbf6-321a-45d6-96a1-7148bd849c92",
+      "type": "medication",
+      "title": "omega 3 tablets",
+      "schedule_time": "06:30",
+      "days": [
+        "Mon",
+        "Tue",
+        "Wed",
+        "Thu",
+        "Fri"
+      ],
+      "notes": "with lunch",
+      "enabled": true,
+      "user_id": "a304e5b5-3ed3-4663-a7b5-9f3303ef303e"
+    }
+  ],
+  "caregivers": [
+    {
+      "id": "107a6579-c251-4e0e-a45a-ae63e786a304",
+      "name": "jyoti srivastava",
+      "phone": "9026186842",
+      "relationship": "mother",
+      "permissions": [
+        "appointment_reminders",
+        "health_records",
+        "emergency_contact"
+      ],
+      "user_id": "a304e5b5-3ed3-4663-a7b5-9f3303ef303e"
+    }
+  ]
 }

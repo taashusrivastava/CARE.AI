@@ -3,16 +3,35 @@ import { api, API_BASE, getToken } from "@/lib/api";
 import { Send, Mic, MicOff, Volume2, VolumeX, Plus, MessageCircle, Trash2, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 
+const CARE_MODES = [
+  { id: "health", label: "Health Q&A", emoji: "🩺", active: "bg-teal-100 text-teal-900" },
+  { id: "symptoms", label: "Symptom Guide", emoji: "📋", active: "bg-amber-100 text-amber-900" },
+  { id: "report", label: "Report Explainer", emoji: "📄", active: "bg-sky-100 text-sky-900" },
+  { id: "medicine", label: "Medicine Info", emoji: "💊", active: "bg-rose-100 text-rose-900" },
+  { id: "wellness", label: "Mental Wellness", emoji: "🧠", active: "bg-violet-100 text-violet-900" },
+  { id: "doctor", label: "Doctor Prep", emoji: "👨‍⚕️", active: "bg-emerald-100 text-emerald-900" },
+];
+
+const LANGUAGE_OPTIONS = [
+  { id: "english", label: "English" },
+  { id: "hindi", label: "Hindi" },
+  { id: "hinglish", label: "Hinglish" },
+];
+
 export default function Chat() {
   const [sessions, setSessions] = useState([]);
   const [sessionId, setSessionId] = useState(null);
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
+  const [mode, setMode] = useState("health");
+  const [language, setLanguage] = useState("english");
   const [streaming, setStreaming] = useState(false);
   const [listening, setListening] = useState(false);
   const [speakOn, setSpeakOn] = useState(false);
   const boxRef = useRef(null);
   const recogRef = useRef(null);
+  const voiceInputRef = useRef("");
+  const voicePendingRef = useRef(false);
 
   const loadSessions = async () => {
     const r = await api.get("/chat/sessions");
@@ -51,25 +70,8 @@ export default function Chat() {
     window.speechSynthesis.speak(u);
   };
 
-  const toggleMic = () => {
-    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SR) return toast.error("Voice input not supported in this browser");
-    if (listening) { recogRef.current?.stop(); setListening(false); return; }
-    const r = new SR();
-    r.lang = "en-US"; r.interimResults = true; r.continuous = false;
-    r.onresult = (e) => {
-      const t = Array.from(e.results).map(x => x[0].transcript).join(" ");
-      setInput(t);
-    };
-    r.onend = () => setListening(false);
-    r.onerror = () => setListening(false);
-    r.start();
-    recogRef.current = r;
-    setListening(true);
-  };
-
-  const send = async () => {
-    const text = input.trim();
+  const send = async (overrideText) => {
+    const text = (overrideText ?? input).trim();
     if (!text || !sessionId || streaming) return;
     setInput("");
     const userMsg = { role: "user", content: text, created_at: new Date().toISOString() };
@@ -81,7 +83,7 @@ export default function Chat() {
       const res = await fetch(`${API_BASE}/chat/message`, {
         method: "POST",
         headers: { "Content-Type": "application/json", "Authorization": `Bearer ${getToken()}` },
-        body: JSON.stringify({ session_id: sessionId, text }),
+        body: JSON.stringify({ session_id: sessionId, text, mode, language }),
       });
       if (!res.ok || !res.body) throw new Error("Chat failed");
       const reader = res.body.getReader();
@@ -123,6 +125,42 @@ export default function Chat() {
     }
   };
 
+  const toggleMic = () => {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) return toast.error("Voice input not supported in this browser");
+    if (listening) {
+      recogRef.current?.stop();
+      voicePendingRef.current = false;
+      setListening(false);
+      return;
+    }
+    voicePendingRef.current = false;
+    voiceInputRef.current = "";
+    const r = new SR();
+    r.lang = language === "hindi" || language === "hinglish" ? "hi-IN" : "en-US";
+    r.interimResults = true;
+    r.continuous = false;
+    r.onresult = (e) => {
+      const t = Array.from(e.results).map(x => x[0].transcript).join(" ");
+      setInput(t);
+      voiceInputRef.current = t;
+      if (Array.from(e.results).some((result) => result.isFinal)) {
+        voicePendingRef.current = true;
+      }
+    };
+    r.onend = () => {
+      setListening(false);
+      if (voicePendingRef.current && voiceInputRef.current.trim()) {
+        voicePendingRef.current = false;
+        send(voiceInputRef.current);
+      }
+    };
+    r.onerror = () => setListening(false);
+    r.start();
+    recogRef.current = r;
+    setListening(true);
+  };
+
   return (
     <div className="max-w-7xl mx-auto grid lg:grid-cols-12 gap-5 h-[calc(100vh-6rem)]">
       {/* Session list */}
@@ -158,14 +196,39 @@ export default function Chat() {
             </div>
           </div>
           <button data-testid="chat-toggle-speak" onClick={() => setSpeakOn(!speakOn)}
+            title="Toggle voice replies"
             className={`p-2 rounded-full ${speakOn ? "bg-rose-200 text-rose-800" : "bg-white/80 text-slate-500"}`}>
             {speakOn ? <Volume2 className="w-4 h-4"/> : <VolumeX className="w-4 h-4"/>}
           </button>
         </div>
 
+        <div className="mt-4 rounded-3xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-900 shadow-sm">
+          <div className="font-semibold">🎙️ Talk to CareAI</div>
+          <div className="mt-2 text-slate-600">Speak your question aloud, then listen to a friendly reply. Tap the microphone to talk and enable voice replies with the speaker toggle.</div>
+        </div>
+
         <div className="mt-3 p-3 rounded-2xl bg-amber-50 border border-amber-200 text-xs text-amber-900 flex gap-2">
           <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5"/>
           <span>This AI assistant provides informational guidance only and is not a substitute for professional medical diagnosis or treatment. Seek emergency medical care for urgent or life-threatening conditions.</span>
+        </div>
+
+        {/* AI Copilot Mode Selector */}
+        <div className="mt-3 flex flex-wrap gap-2">
+          {CARE_MODES.map((m) => (
+            <button key={m.id} data-testid={`mode-${m.id}`} onClick={() => setMode(m.id)}
+              className={`px-3 py-1.5 rounded-full text-xs font-semibold transition ${mode === m.id ? m.active : "bg-white/80 text-slate-600 hover:bg-white"}`}>
+              {m.emoji} {m.label}
+            </button>
+          ))}
+        </div>
+
+        <div className="mt-3 flex flex-wrap gap-2">
+          {LANGUAGE_OPTIONS.map((lang) => (
+            <button key={lang.id} onClick={() => setLanguage(lang.id)}
+              className={`px-3 py-1.5 rounded-full text-xs font-semibold transition ${language === lang.id ? "bg-rose-500 text-white" : "bg-white/80 text-slate-600 hover:bg-white"}`}>
+              {lang.label}
+            </button>
+          ))}
         </div>
 
         <div ref={boxRef} data-testid="chat-messages" className="mt-4 flex-1 overflow-y-auto space-y-3 pr-1">
@@ -190,18 +253,26 @@ export default function Chat() {
           ))}
         </div>
 
-        <form onSubmit={(e)=>{e.preventDefault(); send();}} className="mt-4 flex items-center gap-2">
-          <button type="button" data-testid="chat-mic" onClick={toggleMic}
-            className={`p-3 rounded-full ${listening ? "bg-rose-300 text-white" : "bg-white/80 text-slate-600"}`}>
-            {listening ? <MicOff className="w-4 h-4"/> : <Mic className="w-4 h-4"/>}
-          </button>
-          <input data-testid="chat-input" value={input} onChange={(e)=>setInput(e.target.value)}
-            placeholder="Ask about symptoms, medicines, wellness…"
-            className="flex-1 px-5 py-3 rounded-full bg-white/90 border border-white outline-none focus:ring-4 focus:ring-rose-200 text-sm"/>
-          <button data-testid="chat-send" disabled={streaming || !input.trim()} type="submit"
-            className="p-3 rounded-full bg-rose-400 text-white disabled:opacity-50 hover:scale-105 transition">
-            <Send className="w-4 h-4"/>
-          </button>
+        <form onSubmit={(e)=>{e.preventDefault(); send();}} className="mt-4 flex flex-col gap-3">
+          <div className="flex items-center gap-2">
+            <button type="button" data-testid="chat-mic" onClick={toggleMic}
+              aria-pressed={listening}
+              className={`p-3 rounded-full ${listening ? "bg-rose-300 text-white" : "bg-white/80 text-slate-600"}`}>
+              {listening ? <MicOff className="w-4 h-4"/> : <Mic className="w-4 h-4"/>}
+            </button>
+            <div className="text-sm text-slate-600">
+              {listening ? "Listening... speak now and CareAI will respond automatically." : "Tap the mic to speak. Tap send to ask manually."}
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <input data-testid="chat-input" value={input} onChange={(e)=>setInput(e.target.value)}
+              placeholder="Ask about symptoms, medicines, wellness…"
+              className="flex-1 px-5 py-3 rounded-full bg-white/90 border border-white outline-none focus:ring-4 focus:ring-rose-200 text-sm"/>
+            <button data-testid="chat-send" disabled={streaming || !input.trim()} type="submit"
+              className="p-3 rounded-full bg-rose-400 text-white disabled:opacity-50 hover:scale-105 transition">
+              <Send className="w-4 h-4"/>
+            </button>
+          </div>
         </form>
       </div>
     </div>

@@ -11,6 +11,14 @@
   --mint: #A7F3D0;
   --peach: #FED7AA;
   --slate-ink: #1E293B;
+  --bg-blob1: #FDE2E4;
+  --bg-blob2: #DBEAFE;
+  --bg-blob3: #E9D5FF;
+  --glass-bg: rgba(255,255,255,0.72);
+  --glass-border: rgba(255,255,255,0.6);
+  --glass-strong-bg: rgba(255,255,255,0.85);
+  --glass-strong-border: rgba(255,255,255,0.7);
+  --hover-bg: rgba(255,255,255,0.7);
 }
 
 html, body, #root { height: 100%; }
@@ -18,10 +26,19 @@ html, body, #root { height: 100%; }
 body {
   margin: 0;
   font-family: 'Nunito', system-ui, -apple-system, sans-serif;
-  background: var(--cream);
-  color: var(--slate-ink);
+  background: var(--background-bg, var(--cream));
+  color: var(--text-body, var(--slate-ink));
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
+}
+
+button, input, textarea, select {
+  font: inherit;
+}
+
+* {
+  box-sizing: border-box;
 }
 
 h1, h2, h3, h4, .font-display { font-family: 'Fredoka', 'Nunito', sans-serif; letter-spacing: -0.01em; }
@@ -31,25 +48,25 @@ h1, h2, h3, h4, .font-display { font-family: 'Fredoka', 'Nunito', sans-serif; le
   position: relative;
   min-height: 100vh;
   background:
-    radial-gradient(1200px 600px at 10% -10%, #FDE2E4 0%, transparent 60%),
-    radial-gradient(1000px 500px at 100% 20%, #DBEAFE 0%, transparent 60%),
-    radial-gradient(900px 500px at 30% 100%, #E9D5FF 0%, transparent 60%),
-    var(--cream);
+    radial-gradient(1200px 600px at 10% -10%, var(--bg-blob1) 0%, transparent 60%),
+    radial-gradient(1000px 500px at 100% 20%, var(--bg-blob2) 0%, transparent 60%),
+    radial-gradient(900px 500px at 30% 100%, var(--bg-blob3) 0%, transparent 60%),
+    var(--background-bg, var(--cream));
 }
 
 .glass {
-  background: rgba(255,255,255,0.72);
+  background: var(--glass-bg);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255,255,255,0.6);
+  border: 1px solid var(--glass-border);
   box-shadow: 0 8px 32px rgba(30,41,59,0.06);
 }
 
 .glass-strong {
-  background: rgba(255,255,255,0.85);
+  background: var(--glass-strong-bg);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(255,255,255,0.7);
+  border: 1px solid var(--glass-strong-border);
   box-shadow: 0 12px 40px rgba(30,41,59,0.08);
 }
 
@@ -70,6 +87,19 @@ h1, h2, h3, h4, .font-display { font-family: 'Fredoka', 'Nunito', sans-serif; le
 }
 .sos-pulse { animation: softpulse 1.6s ease-out infinite; }
 
+.doodle-dot,
+.doodle-ring {
+  pointer-events: none;
+}
+
+.doodle-dot {
+  box-shadow: 0 10px 30px rgba(255,255,255,0.7);
+}
+
+.doodle-ring {
+  border: 2px solid rgba(255,255,255,0.85);
+}
+
 .chat-typing span {
   display: inline-block; width: 8px; height: 8px; margin: 0 2px;
   border-radius: 999px; background: #D8B4E2;
@@ -86,7 +116,8 @@ h1, h2, h3, h4, .font-display { font-family: 'Fredoka', 'Nunito', sans-serif; le
 .leaflet-container { height: 100%; width: 100%; border-radius: 1.5rem; }
 
 @layer base {
-  :root {
+  :root,
+  .theme-light {
     --background: 40 40% 98%;
     --foreground: 222 47% 15%;
     --card: 0 0% 100%;
@@ -108,7 +139,305 @@ h1, h2, h3, h4, .font-display { font-family: 'Fredoka', 'Nunito', sans-serif; le
     --ring: 351 96% 75%;
     --radius: 1rem;
   }
+
+  /* Dark mode */
+  .theme-dark {
+    --background: 222 47% 8%;
+    --foreground: 210 40% 96%;
+    --card: 222 45% 12%;
+    --card-foreground: 210 40% 96%;
+    --popover: 222 45% 12%;
+    --popover-foreground: 210 40% 96%;
+    --primary: 351 96% 70%;
+    --primary-foreground: 355 85% 12%;
+    --secondary: 213 60% 35%;
+    --secondary-foreground: 210 40% 96%;
+    --muted: 222 30% 18%;
+    --muted-foreground: 215 20% 70%;
+    --accent: 285 45% 40%;
+    --accent-foreground: 210 40% 96%;
+    --destructive: 0 70% 55%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 222 30% 22%;
+    --input: 222 30% 22%;
+    --ring: 351 96% 65%;
+  }
+
+  /* Warm light */
+  .theme-warm {
+    --background: 35 60% 96%;
+    --foreground: 25 40% 18%;
+    --card: 40 60% 99%;
+    --card-foreground: 25 40% 18%;
+    --popover: 40 60% 99%;
+    --popover-foreground: 25 40% 18%;
+    --primary: 25 90% 72%;
+    --primary-foreground: 25 60% 20%;
+    --secondary: 38 90% 70%;
+    --secondary-foreground: 30 60% 20%;
+    --muted: 35 40% 92%;
+    --muted-foreground: 30 20% 45%;
+    --accent: 15 80% 80%;
+    --accent-foreground: 15 60% 22%;
+    --destructive: 10 75% 55%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 35 40% 86%;
+    --input: 35 40% 88%;
+    --ring: 25 90% 65%;
+  }
+
+  /* Cartoon - playful bright */
+  .theme-cartoon {
+    --background: 48 90% 94%;
+    --foreground: 220 60% 20%;
+    --card: 48 100% 99%;
+    --card-foreground: 220 60% 20%;
+    --popover: 48 100% 99%;
+    --popover-foreground: 220 60% 20%;
+    --primary: 45 100% 60%;      /* sunny yellow */
+    --primary-foreground: 220 70% 15%;
+    --secondary: 190 90% 60%;    /* aqua */
+    --secondary-foreground: 200 70% 15%;
+    --muted: 48 80% 90%;
+    --muted-foreground: 220 20% 45%;
+    --accent: 320 90% 70%;       /* bubblegum */
+    --accent-foreground: 320 70% 20%;
+    --destructive: 0 85% 55%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 48 70% 82%;
+    --input: 48 70% 86%;
+    --ring: 45 100% 55%;
+  }
+
+  /* 90's retro - neon pop */
+  .theme-nineties {
+    --background: 270 70% 94%;
+    --foreground: 290 70% 20%;
+    --card: 270 80% 98%;
+    --card-foreground: 290 70% 20%;
+    --popover: 270 80% 98%;
+    --popover-foreground: 290 70% 20%;
+    --primary: 285 100% 65%;     /* neon purple */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 190 100% 55%;   /* neon cyan */
+    --secondary-foreground: 200 90% 15%;
+    --muted: 270 60% 90%;
+    --muted-foreground: 290 30% 45%;
+    --accent: 330 100% 65%;      /* neon pink */
+    --accent-foreground: 330 80% 15%;
+    --destructive: 0 90% 55%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 270 60% 82%;
+    --input: 270 60% 86%;
+    --ring: 285 100% 60%;
+  }
+
+  /* Floral - garden pastel */
+  .theme-floral {
+    --background: 330 60% 96%;
+    --foreground: 340 40% 20%;
+    --card: 330 70% 99%;
+    --card-foreground: 340 40% 20%;
+    --popover: 330 70% 99%;
+    --popover-foreground: 340 40% 20%;
+    --primary: 340 90% 75%;      /* rose pink */
+    --primary-foreground: 340 60% 20%;
+    --secondary: 150 45% 70%;    /* sage green */
+    --secondary-foreground: 150 50% 18%;
+    --muted: 330 40% 92%;
+    --muted-foreground: 340 20% 45%;
+    --accent: 45 90% 75%;        /* buttery */
+    --accent-foreground: 40 60% 20%;
+    --destructive: 350 80% 55%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 330 45% 86%;
+    --input: 330 45% 88%;
+    --ring: 340 90% 70%;
+  }
+
+/* Anime - vibrant pop-anime */
+  .theme-anime {
+    --background: 210 60% 96%;
+    --foreground: 230 60% 20%;
+    --card: 210 70% 99%;
+    --card-foreground: 230 60% 20%;
+    --popover: 210 70% 99%;
+    --popover-foreground: 230 60% 20%;
+    --primary: 330 100% 70%;     /* sakura pink */
+    --primary-foreground: 330 80% 15%;
+    --secondary: 230 90% 70%;    /* blue */
+    --secondary-foreground: 230 80% 15%;
+    --muted: 210 50% 92%;
+    --muted-foreground: 230 25% 45%;
+    --accent: 45 100% 65%;       /* energy yellow */
+    --accent-foreground: 40 80% 18%;
+    --destructive: 0 85% 55%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 210 50% 86%;
+    --input: 210 50% 88%;
+    --ring: 330 100% 65%;
+  }
 }
+
+/* Per-theme visual overrides (background blobs, glass, hover) */
+.theme-light {
+  --background-bg: #FDFBF7;
+  --bg-blob1: #FDE2E4;
+  --bg-blob2: #DBEAFE;
+  --bg-blob3: #E9D5FF;
+  --glass-bg: rgba(255,255,255,0.72);
+  --glass-border: rgba(255,255,255,0.6);
+  --glass-strong-bg: rgba(255,255,255,0.85);
+  --glass-strong-border: rgba(255,255,255,0.7);
+  --hover-bg: rgba(255,255,255,0.7);
+}
+
+.theme-dark {
+  --background-bg: #0f172a;
+  --bg-blob1: rgba(190,24,93,0.28);
+  --bg-blob2: rgba(30,64,175,0.28);
+  --bg-blob3: rgba(109,40,217,0.28);
+  --glass-bg: rgba(30,41,59,0.7);
+  --glass-border: rgba(148,163,184,0.18);
+  --glass-strong-bg: rgba(30,41,59,0.85);
+  --glass-strong-border: rgba(148,163,184,0.22);
+  --hover-bg: rgba(51,65,85,0.6);
+}
+
+.theme-warm {
+  --background-bg: #FCF3E8;
+  --bg-blob1: #FDE3D4;
+  --bg-blob2: #FCEFC9;
+  --bg-blob3: #FBE0C8;
+  --glass-bg: rgba(255,248,240,0.72);
+  --glass-border: rgba(255,255,255,0.6);
+  --glass-strong-bg: rgba(255,250,240,0.85);
+  --glass-strong-border: rgba(255,255,255,0.7);
+  --hover-bg: rgba(255,255,255,0.75);
+}
+
+.theme-cartoon {
+  --background-bg: #FFF6D6;
+  --bg-blob1: #FFE29A;
+  --bg-blob2: #B8F3FF;
+  --bg-blob3: #FFC9E8;
+  --glass-bg: rgba(255,255,255,0.74);
+  --glass-border: rgba(255,255,255,0.65);
+  --glass-strong-bg: rgba(255,255,255,0.86);
+  --glass-strong-border: rgba(255,255,255,0.75);
+  --hover-bg: rgba(255,255,255,0.8);
+}
+
+.theme-nineties {
+  --background-bg: #EFE6FF;
+  --bg-blob1: #D8B4FE;
+  --bg-blob2: #67E8F9;
+  --bg-blob3: #F9A8D4;
+  --glass-bg: rgba(255,255,255,0.72);
+  --glass-border: rgba(255,255,255,0.6);
+  --glass-strong-bg: rgba(255,255,255,0.84);
+  --glass-strong-border: rgba(255,255,255,0.7);
+  --hover-bg: rgba(255,255,255,0.78);
+}
+
+.theme-floral {
+  --background-bg: #FDF2F8;
+  --bg-blob1: #FBCFE8;
+  --bg-blob2: #D1FAE5;
+  --bg-blob3: #FEF3C7;
+  --glass-bg: rgba(255,255,255,0.72);
+  --glass-border: rgba(255,255,255,0.6);
+  --glass-strong-bg: rgba(255,255,255,0.85);
+  --glass-strong-border: rgba(255,255,255,0.7);
+  --hover-bg: rgba(255,255,255,0.76);
+}
+
+.theme-anime {
+  --background-bg: #EFF6FF;
+  --bg-blob1: #F9A8D4;
+  --bg-blob2: #93C5FD;
+  --bg-blob3: #FDE68A;
+  --glass-bg: rgba(255,255,255,0.74);
+  --glass-border: rgba(255,255,255,0.65);
+  --glass-strong-bg: rgba(255,255,255,0.86);
+  --glass-strong-border: rgba(255,255,255,0.75);
+  --hover-bg: rgba(255,255,255,0.8);
+}
+
+/* ===== Theme-aware text colors =====
+   The app uses Tailwind text-slate-* utilities with hardcoded hex values.
+   These overrides remap them so fonts stay readable in every theme.
+   Dark themes swap dark text -> light; light themes keep dark text. */
+
+/* Default / light themes: keep dark slate text (readable on light bg) */
+.theme-light .text-slate-900,
+.theme-warm .text-slate-900,
+.theme-cartoon .text-slate-900,
+.theme-nineties .text-slate-900,
+.theme-floral .text-slate-900,
+.theme-anime .text-slate-900 { color: #0f172a; }
+
+.theme-light .text-slate-800,
+.theme-warm .text-slate-800,
+.theme-cartoon .text-slate-800,
+.theme-nineties .text-slate-800,
+.theme-floral .text-slate-800,
+.theme-anime .text-slate-800 { color: #1e293b; }
+
+.theme-light .text-slate-700,
+.theme-warm .text-slate-700,
+.theme-cartoon .text-slate-700,
+.theme-nineties .text-slate-700,
+.theme-floral .text-slate-700,
+.theme-anime .text-slate-700 { color: #334155; }
+
+.theme-light .text-slate-600,
+.theme-warm .text-slate-600,
+.theme-cartoon .text-slate-600,
+.theme-nineties .text-slate-600,
+.theme-floral .text-slate-600,
+.theme-anime .text-slate-600 { color: #475569; }
+
+.theme-light .text-slate-500,
+.theme-warm .text-slate-500,
+.theme-cartoon .text-slate-500,
+.theme-nineties .text-slate-500,
+.theme-floral .text-slate-500,
+.theme-anime .text-slate-500 { color: #64748b; }
+
+.theme-light .text-slate-400,
+.theme-warm .text-slate-400,
+.theme-cartoon .text-slate-400,
+.theme-nineties .text-slate-400,
+.theme-floral .text-slate-400,
+.theme-anime .text-slate-400 { color: #94a3b8; }
+
+.theme-light .text-slate-300,
+.theme-warm .text-slate-300,
+.theme-cartoon .text-slate-300,
+.theme-nineties .text-slate-300,
+.theme-floral .text-slate-300,
+.theme-anime .text-slate-300 { color: #cbd5e1; }
+
+/* Dark theme: remap dark text to light for readability */
+.theme-dark .text-slate-900,
+.theme-dark .text-slate-800,
+.theme-dark .text-slate-700 { color: #e2e8f0; }
+
+.theme-dark .text-slate-600 { color: #cbd5e1; }
+.theme-dark .text-slate-500 { color: #94a3b8; }
+.theme-dark .text-slate-400 { color: #64748b; }
+.theme-dark .text-slate-300 { color: #475569; }
+
+/* Dark theme background text (originally white/light) maps fine already */
+
+/* Headings pick up theme foreground via these overrides */
+.theme-dark h1, .theme-dark h2, .theme-dark h3,
+.theme-dark .font-display { color: #f1f5f9; }
+
+/* On-card muted helper text stays readable */
+.theme-dark .text-slate-500\.5,
+.theme-dark .text-slate-600\.5 { color: #94a3b8; }
 
 @layer base {
   * { @apply border-border; }
