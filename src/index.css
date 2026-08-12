@@ -23,6 +23,8 @@
 
 html, body, #root { height: 100%; }
 
+html, body, #root { height: 100%; }
+
 body {
   margin: 0;
   font-family: 'Nunito', system-ui, -apple-system, sans-serif;
@@ -448,4 +450,80 @@ h1, h2, h3, h4, .font-display { font-family: 'Fredoka', 'Nunito', sans-serif; le
 ::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-thumb { background: #F1D4D9; border-radius: 999px; }
 ::-webkit-scrollbar-track { background: transparent; }
+
+html {
+  --careai-text-scale: 1;
+  --careai-easy-view: 0;
+  --careai-high-contrast: 0;
+  --careai-reduce-motion: 0;
+}
+
+html[data-easy-view="true"] body {
+  font-size: calc(16px * var(--careai-text-scale));
+}
+
+html[data-easy-view="true"] .App {
+  font-size: 1.06rem;
+}
+
+html[data-easy-view="true"] .glass,
+html[data-easy-view="true"] .glass-strong,
+html[data-easy-view="true"] .rounded-2xl,
+html[data-easy-view="true"] .rounded-3xl,
+html[data-easy-view="true"] .rounded-xl {
+  border-radius: 1.4rem;
+}
+
+html[data-easy-view="true"] .text-xs { font-size: 0.82rem !important; }
+html[data-easy-view="true"] .text-sm { font-size: 0.95rem !important; }
+html[data-easy-view="true"] .text-base { font-size: 1.08rem !important; }
+html[data-easy-view="true"] h1 { font-size: clamp(2rem, 4vw, 3rem) !important; }
+html[data-easy-view="true"] h2 { font-size: clamp(1.5rem, 3vw, 2.2rem) !important; }
+html[data-easy-view="true"] h3 { font-size: clamp(1.25rem, 2.6vw, 1.8rem) !important; }
+
+html[data-easy-view="true"] a,
+html[data-easy-view="true"] button,
+html[data-easy-view="true"] input,
+html[data-easy-view="true"] textarea,
+html[data-easy-view="true"] select {
+  min-height: 44px;
+  font-size: 1rem;
+}
+
+html[data-easy-view="true"] .space-y-1 > * + *,
+html[data-easy-view="true"] .space-y-2 > * + *,
+html[data-easy-view="true"] .space-y-3 > * + *,
+html[data-easy-view="true"] .space-y-4 > * + * {
+  margin-top: 0.6rem;
+}
+
+html[data-easy-view="true"] nav a,
+html[data-easy-view="true"] [data-testid^="nav-"] {
+  padding-top: 0.9rem !important;
+  padding-bottom: 0.9rem !important;
+  font-size: 1rem !important;
+}
+
+html[data-easy-view="true"] .sos-pulse {
+  transform: scale(1.05);
+}
+
+html[data-high-contrast="true"] body {
+  background: #f9fafb;
+}
+
+html[data-high-contrast="true"] .glass,
+html[data-high-contrast="true"] .glass-strong {
+  border: 2px solid rgba(15, 23, 42, 0.25);
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
+}
+
+html[data-reduce-motion="true"] *,
+html[data-reduce-motion="true"] *::before,
+html[data-reduce-motion="true"] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
 

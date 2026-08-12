@@ -14,6 +14,11 @@ export const THEMES = [
 ];
 
 const STORAGE_KEY = "careai_theme";
+const EASY_VIEW_KEY = "careai_easy_view";
+const TEXT_SCALE_KEY = "careai_text_scale";
+const HIGH_CONTRAST_KEY = "careai_high_contrast";
+const REDUCE_MOTION_KEY = "careai_reduce_motion";
+const LANGUAGE_KEY = "careai_language";
 
 export function ThemeProvider({ children }) {
   const [theme, setTheme] = useState(() => {
@@ -21,6 +26,46 @@ export function ThemeProvider({ children }) {
       return localStorage.getItem(STORAGE_KEY) || "light";
     } catch {
       return "light";
+    }
+  });
+
+  const [easyView, setEasyView] = useState(() => {
+    try {
+      return localStorage.getItem(EASY_VIEW_KEY) === "true";
+    } catch {
+      return false;
+    }
+  });
+
+  const [textScale, setTextScale] = useState(() => {
+    try {
+      return Number(localStorage.getItem(TEXT_SCALE_KEY) || 1);
+    } catch {
+      return 1;
+    }
+  });
+
+  const [highContrast, setHighContrast] = useState(() => {
+    try {
+      return localStorage.getItem(HIGH_CONTRAST_KEY) === "true";
+    } catch {
+      return false;
+    }
+  });
+
+  const [reduceMotion, setReduceMotion] = useState(() => {
+    try {
+      return localStorage.getItem(REDUCE_MOTION_KEY) === "true";
+    } catch {
+      return false;
+    }
+  });
+
+  const [language, setLanguage] = useState(() => {
+    try {
+      return localStorage.getItem(LANGUAGE_KEY) || "en";
+    } catch {
+      return "en";
     }
   });
 
@@ -35,11 +80,47 @@ export function ThemeProvider({ children }) {
     } catch {}
   }, [theme]);
 
+  useEffect(() => {
+    const root = document.documentElement;
+    root.setAttribute("data-easy-view", String(easyView));
+    root.setAttribute("data-high-contrast", String(highContrast));
+    root.setAttribute("data-reduce-motion", String(reduceMotion));
+    root.setAttribute("data-text-scale", String(textScale));
+    root.setAttribute("data-language", language);
+    root.style.setProperty("--careai-text-scale", String(textScale));
+    root.style.setProperty("--careai-easy-view", easyView ? "1" : "0");
+    root.style.setProperty("--careai-high-contrast", highContrast ? "1" : "0");
+    root.style.setProperty("--careai-reduce-motion", reduceMotion ? "1" : "0");
+    root.lang = language === "hi" ? "hi-IN" : "en-US";
+
+    try {
+      localStorage.setItem(EASY_VIEW_KEY, String(easyView));
+      localStorage.setItem(TEXT_SCALE_KEY, String(textScale));
+      localStorage.setItem(HIGH_CONTRAST_KEY, String(highContrast));
+      localStorage.setItem(REDUCE_MOTION_KEY, String(reduceMotion));
+      localStorage.setItem(LANGUAGE_KEY, language);
+    } catch {}
+  }, [easyView, textScale, highContrast, reduceMotion, language]);
+
   const setThemeSafe = useCallback((id) => {
     if (THEMES.some((t) => t.id === id)) setTheme(id);
   }, []);
 
-  const value = useMemo(() => ({ theme, setTheme: setThemeSafe, themes: THEMES }), [theme, setThemeSafe]);
+  const value = useMemo(() => ({
+    theme,
+    setTheme: setThemeSafe,
+    themes: THEMES,
+    easyView,
+    setEasyView,
+    textScale,
+    setTextScale,
+    highContrast,
+    setHighContrast,
+    reduceMotion,
+    setReduceMotion,
+    language,
+    setLanguage,
+  }), [theme, setThemeSafe, easyView, textScale, highContrast, reduceMotion, language]);
 
   return <ThemeCtx.Provider value={value}>{children}</ThemeCtx.Provider>;
 }
