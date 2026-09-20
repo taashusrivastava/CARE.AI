@@ -1,7 +1,5 @@
 import axios from "axios";
 
-// Use the deployed backend URL when provided.
-// Otherwise, use the local FastAPI backend during development.
 function resolveBase() {
   const envBase = process.env.REACT_APP_BACKEND_URL;
 
@@ -20,19 +18,19 @@ export const api = axios.create({
   baseURL: API_BASE,
 });
 
-api.interceptors.request.use((cfg) => {
-  const t = localStorage.getItem("careai_token");
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem("careai_token");
 
-  if (t) {
-    cfg.headers.Authorization = `Bearer ${t}`;
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
   }
 
-  return cfg;
+  return config;
 });
 
-export function setToken(t) {
-  if (t) {
-    localStorage.setItem("careai_token", t);
+export function setToken(token) {
+  if (token) {
+    localStorage.setItem("careai_token", token);
   } else {
     localStorage.removeItem("careai_token");
   }

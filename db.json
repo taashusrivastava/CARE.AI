@@ -93,6 +93,14 @@
       "password_hash": "$2b$12$9oLUvRDSgyEw21uYo4.GbOnjTHi67CTCzin4m.utyZeAmTFxY5sWS",
       "created_at": "2026-08-12T16:38:11.264946+00:00",
       "profile": {}
+    },
+    {
+      "id": "c9a316cc-ade7-4b6c-bfbb-85daa25081a6",
+      "full_name": "amar rai",
+      "email": "amarrai19404@gmail.com",
+      "password_hash": "$2b$12$vVPYhO6I4ozntPRGqCt7S.RnNRZEIlWSyBzozKz7e1nGBfArvjHD2",
+      "created_at": "2026-09-20T10:22:14.143209+00:00",
+      "profile": {}
     }
   ],
   "contacts": [
@@ -171,6 +179,20 @@
       "title": "I have a mild headache and fatigue",
       "created_at": "2026-08-09T15:57:39.538671+00:00",
       "updated_at": "2026-08-09T15:57:41.647170+00:00"
+    },
+    {
+      "id": "b6c5274e-01dd-4464-8836-46b8ce0158b9",
+      "user_id": "c9a316cc-ade7-4b6c-bfbb-85daa25081a6",
+      "title": "New chat",
+      "created_at": "2026-09-20T10:24:34.684907+00:00",
+      "updated_at": "2026-09-20T10:24:34.684907+00:00"
+    },
+    {
+      "id": "7dbeba25-4280-4e28-bb18-e8a0b8fbfe78",
+      "user_id": "c9a316cc-ade7-4b6c-bfbb-85daa25081a6",
+      "title": "Hello, can you help me understand my sym",
+      "created_at": "2026-09-20T10:24:35.879299+00:00",
+      "updated_at": "2026-09-20T10:25:24.534826+00:00"
     }
   ],
   "chat_messages": [
@@ -347,6 +369,30 @@
       "role": "assistant",
       "content": "I'm CareAI, your health guidance assistant. I can help you understand symptoms, learn about medicines, and get wellness tips.\n\nFor example, you could ask: \"What is paracetamol used for?\" or \"I have a headache and nausea - what might that be?\"\n\nPlease note this is informational guidance only and not a substitute for professional medical advice. For emergencies, always call your local emergency services.",
       "created_at": "2026-08-10T14:52:55.596800+00:00"
+    },
+    {
+      "session_id": "7dbeba25-4280-4e28-bb18-e8a0b8fbfe78",
+      "role": "user",
+      "content": "Hello, can you help me understand my symptoms?",
+      "created_at": "2026-09-20T10:24:48.083488+00:00"
+    },
+    {
+      "session_id": "7dbeba25-4280-4e28-bb18-e8a0b8fbfe78",
+      "role": "assistant",
+      "content": "Hello! \ud83d\udc4b I'm CareAI, your warm health assistant. I can help you with:\n\n\u2022 Understanding symptoms\n\u2022 Learning about medicines\n\u2022 Wellness and healthy habits\n\nWhat would you like to talk about today? (Remember, I'm here for guidance, not diagnosis.)",
+      "created_at": "2026-09-20T10:24:48.249428+00:00"
+    },
+    {
+      "session_id": "7dbeba25-4280-4e28-bb18-e8a0b8fbfe78",
+      "role": "user",
+      "content": "What are some healthy habits for daily life?",
+      "created_at": "2026-09-20T10:25:24.452286+00:00"
+    },
+    {
+      "session_id": "7dbeba25-4280-4e28-bb18-e8a0b8fbfe78",
+      "role": "assistant",
+      "content": "I'm CareAI, your health guidance assistant. I can help you understand symptoms, learn about medicines, and get wellness tips.\n\nFor example, you could ask: \"What is paracetamol used for?\" or \"I have a headache and nausea - what might that be?\"\n\nPlease note this is informational guidance only and not a substitute for professional medical advice. For emergencies, always call your local emergency services.",
+      "created_at": "2026-09-20T10:25:24.526407+00:00"
     }
   ],
   "family_members": [
