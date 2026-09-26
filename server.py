@@ -26,7 +26,11 @@ except Exception:
 load_dotenv()
 
 ROOT_DIR = Path(__file__).parent
-DB_FILE = ROOT_DIR / 'db.json'
+# Use DB_DIR env var (points to Render's persistent disk /data) so user data
+# survives redeploys. Falls back to project root for local development.
+_db_dir = Path(os.environ.get('DB_DIR', str(ROOT_DIR)))
+_db_dir.mkdir(parents=True, exist_ok=True)
+DB_FILE = _db_dir / 'db.json'
 
 JWT_SECRET = os.environ.get('JWT_SECRET', 'careai-dev-secret-key-change-in-production')
 JWT_ALGO = os.environ.get('JWT_ALGORITHM', 'HS256')
@@ -1432,11 +1436,18 @@ async def admin_trigger(reminder_id: str):
     await db.reminders.update_one({"id": reminder_id}, {"$set": {"last_triggered": now_iso()}})
     return {"status": "triggered"}
 
+# ── Health check (required by Render) ────────────────────────────────────────
+@api.get("/health")
+async def health():
+    return {"status": "ok"}
+
 app.include_router(api)
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
-    allow_origins=os.environ.get('CORS_ORIGINS', '*').split(','),
+    # Strip whitespace from each origin so "https://x.vercel.app, http://localhost:3000"
+    # is parsed correctly even if the env var has spaces after commas.
+    allow_origins=[o.strip() for o in os.environ.get('CORS_ORIGINS', '*').split(',') if o.strip()],
     allow_methods=["*"],
     allow_headers=["*"],
 )

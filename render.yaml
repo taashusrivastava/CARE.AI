@@ -6,7 +6,25 @@ services:
     branch: main
     dockerfilePath: Dockerfile.backend
     dockerContext: .
+    healthCheckPath: /api/health
+    # Persistent disk so db.json (user data) survives redeploys
+    disk:
+      name: careai-data
+      mountPath: /data
+      sizeGB: 1
     envVars:
+      # ── Auth ──────────────────────────────────────────────────────────
+      - key: JWT_SECRET
+        generateValue: true          # Render auto-generates a secure random value
+      - key: JWT_ALGORITHM
+        value: HS256
+      # ── CORS: replace YOUR_VERCEL_APP with your actual Vercel URL ────
+      - key: CORS_ORIGINS
+        value: https://your-app.vercel.app,http://localhost:3000,http://localhost:3002
+      # ── Data directory (persisted disk) ──────────────────────────────
+      - key: DB_DIR
+        value: /data
+      # ── Optional API keys (set in Render dashboard) ──────────────────
       - key: OPENAI_API_KEY
         sync: false
       - key: ANTHROPIC_API_KEY
